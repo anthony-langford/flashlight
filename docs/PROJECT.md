@@ -9,7 +9,8 @@ Help one person (the owner) understand the Toronto housing market and the macro 
 - Lives in Canada, planning to buy a home in Toronto.
 - Purchase timeline: 3 months to 1 year (stated 2026-10-14). Near-term, so rates, listings, inventory and affordability matter more than long-run demographics.
 - Property type: freehold, semi-detached or detached. Prioritise TRREB semi-detached and detached breakdowns and freehold benchmark prices. Condo and pre-construction data are lower priority.
-- Target areas are not yet specified. See open questions in ROADMAP.md.
+- Budget: $1.10M to $1.35M (stated 2026-10-14). Used for affordability defaults. It sits near insured-mortgage price and down payment thresholds, so those rules must be verified before the calculator is built (README list).
+- Target areas (stated 2026-10-14): east end and west end, with good school districts. Named: Riverdale and Monarch Park (east), Sunnylea (west, Etobicoke). TRREB district codes are unconfirmed and must be read from a Market Watch PDF. School quality data is a backlog item.
 - Wants to run it locally first, host it later.
 - Front end: React.
 
@@ -34,7 +35,7 @@ Out of scope for now:
 
 - China data. It was dropped from the housing tool on 2026-10-14 because the channel to Toronto is weak and indirect. It belongs to a separate Canada / US / China macro dashboard, a later topic pack.
 - Hosting, user accounts, sharing, forking dashboards.
-- LLM series discovery (planned after the core works, see ROADMAP).
+- LLM series discovery (planned after the core works, see README milestones).
 - Individual listing data, MLS-level data.
 
 ## Design principles

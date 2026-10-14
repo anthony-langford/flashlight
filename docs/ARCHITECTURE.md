@@ -1,6 +1,6 @@
 # Architecture
 
-Status: planned. Nothing below is implemented yet unless ROADMAP.md says so.
+Status: planned. Nothing below is implemented yet unless the README status says so.
 
 ## Data flow
 
