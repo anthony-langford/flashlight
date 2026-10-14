@@ -1,4 +1,5 @@
 import { useId, useMemo, useState } from "react";
+import { CLOSING_COSTS_READ_ON, estimateClosingCosts, type Basis } from "../closingCosts";
 import { fmtMoney, fmtValue } from "../format";
 import {
   INSURED_PRICE_CAP,
@@ -13,6 +14,12 @@ import {
 import type { AppData } from "../types";
 
 const GRID_RATE_STEPS = [-1, 0, 1, 2];
+
+const BASIS_LABEL: Record<Basis, string> = {
+  official: "Official source",
+  commercial: "Commercial source, rough",
+  assumption: "My allowance, no reliable source",
+};
 
 function round25k(v: number): number {
   return Math.round(v / 25_000) * 25_000;
@@ -72,7 +79,9 @@ export function AffordabilityPanel({ data, params }: { data: AppData; params?: U
     params?.get("ftb") ? params.get("ftb") === "1" : plan.firstTimeBuyer,
   );
   const [compounding, setCompounding] = useState<Compounding>("semiannual");
-  const [otherClosing, setOtherClosing] = useState(0);
+  const closing = useMemo(() => estimateClosingCosts(), []);
+  // Starts at the typical estimate. Edit it to use your own figure, or reset it to the estimate.
+  const [otherClosing, setOtherClosing] = useState(num("other", closing.typical));
 
   const inputs: Inputs = useMemo(() => {
     const clean = (n: number) => (Number.isFinite(n) ? n : 0);
@@ -120,8 +129,9 @@ export function AffordabilityPanel({ data, params }: { data: AppData; params?: U
     <section className="panel" aria-labelledby="afford-h">
       <h2 id="afford-h">Affordability</h2>
       <p className="muted">
-        A payment and closing cost estimate for a purchase in the City of Toronto. Rules were read from
-        official pages on {RULES_VERIFIED_ON} (see docs/MORTGAGE_RULES.md). Estimate only, not advice.
+        A payment and closing cost estimate for a purchase in the City of Toronto. Mortgage and tax rules
+        were read from official pages on {RULES_VERIFIED_ON} (see docs/MORTGAGE_RULES.md). Other closing
+        costs are rough estimates (see docs/CLOSING_COSTS.md). Estimate only, not advice.
       </p>
 
       <div className="afford">
@@ -163,8 +173,21 @@ export function AffordabilityPanel({ data, params }: { data: AppData; params?: U
             <input type="checkbox" checked={firstTimeBuyer} onChange={(e) => setFirstTimeBuyer(e.target.checked)} />
             I am a first-time buyer (unlocks 30-year insured amortization and land transfer tax rebates)
           </label>
-          <NumberField label="Other closing costs" value={otherClosing} onChange={setOtherClosing} step={500} suffix="$"
-            hint="Legal fees, title insurance, adjustments. Not estimated here." />
+          <NumberField
+            label="Other closing costs"
+            value={otherClosing}
+            onChange={setOtherClosing}
+            step={500}
+            suffix="$"
+            hint={`Estimate ${fmtMoney(closing.typical)}, range ${fmtMoney(closing.low)} to ${fmtMoney(closing.high)}. Lawyer, registration, title insurance, inspection, appraisal. Edit to use a quote.`}
+          />
+          {otherClosing !== closing.typical && (
+            <div className="chips">
+              <button type="button" className="chip" onClick={() => setOtherClosing(closing.typical)}>
+                Use the estimate
+              </button>
+            </div>
+          )}
           <p className="muted small">
             For reference, Bank of Canada:{" "}
             {refs.map((s, i) => (
@@ -229,7 +252,7 @@ export function AffordabilityPanel({ data, params }: { data: AppData; params?: U
                   <tr><th scope="row">Sales tax on insurance premium (8%, paid in cash)</th><td className="num">{fmtMoney(r.premiumTax)}</td></tr>
                 )}
                 {inputs.otherClosing > 0 && (
-                  <tr><th scope="row">Other closing costs</th><td className="num">{fmtMoney(inputs.otherClosing)}</td></tr>
+                  <tr><th scope="row">Other closing costs (lawyer, title insurance, inspection and so on)</th><td className="num">{fmtMoney(inputs.otherClosing)}</td></tr>
                 )}
                 <tr><th scope="row">Total</th><td className="num"><strong>{fmtMoney(r.cashToClose)}</strong></td></tr>
               </tbody>
@@ -281,13 +304,69 @@ export function AffordabilityPanel({ data, params }: { data: AppData; params?: U
       </div>
 
       <details className="table-view">
+        <summary>How the other closing costs are estimated</summary>
+        <p className="small muted">
+          A rough budget for a freehold purchase with a mortgage in Ontario, from sources read on{" "}
+          {CLOSING_COSTS_READ_ON}. It is not a quote. Land transfer tax is calculated separately above.
+        </p>
+        <div className="table-scroll">
+          <table>
+            <caption>Estimated closing costs, apart from land transfer tax</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col" className="num">Low</th>
+                <th scope="col" className="num">Typical</th>
+                <th scope="col" className="num">High</th>
+                <th scope="col">Basis</th>
+              </tr>
+            </thead>
+            <tbody>
+              {closing.items.map((i) => (
+                <tr key={i.key}>
+                  <th scope="row">{i.label}</th>
+                  <td className="num">{fmtMoney(i.low)}</td>
+                  <td className="num">{fmtMoney(i.typical)}</td>
+                  <td className="num">{fmtMoney(i.high)}</td>
+                  <td>{BASIS_LABEL[i.basis]}</td>
+                </tr>
+              ))}
+              <tr>
+                <th scope="row">Total</th>
+                <td className="num"><strong>{fmtMoney(closing.low)}</strong></td>
+                <td className="num"><strong>{fmtMoney(closing.typical)}</strong></td>
+                <td className="num"><strong>{fmtMoney(closing.high)}</strong></td>
+                <td />
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ul className="small muted">
+          {closing.items.map((i) => (
+            <li key={i.key}>
+              <strong>{i.label}.</strong> {i.source}
+              {i.note ? ` ${i.note}` : ""}
+            </li>
+          ))}
+        </ul>
+        <p className="small"><strong>Not included</strong></p>
+        <ul className="small muted">
+          {closing.excluded.map((x) => (
+            <li key={x.label}>
+              <strong>{x.label}.</strong> {x.why}
+            </li>
+          ))}
+        </ul>
+      </details>
+
+      <details className="table-view">
         <summary>Assumptions and what is not included</summary>
         <ul className="small muted">
           <li>Insured price cap used: {fmtMoney(INSURED_PRICE_CAP)} (Finance Canada, effective Dec 15, 2024). An FCAC page still mentions $1 million, so confirm with a lender.</li>
           <li>Insurance premium uses CMHC's table, added to the mortgage, plus 0.20% when amortization is over 25 years. Other insurers may price differently.</li>
           <li>Compounding is a convention, not a verified rule. Lenders may calculate differently.</li>
           <li>Toronto's first-time buyer rebate of $4,475 was last confirmed on a page dated Dec 2025 and may have changed.</li>
-          <li>Not included: legal fees, title insurance, property tax adjustments, inspection, moving, and any affordability test against income.</li>
+          <li>Not included: property tax and utility adjustments, a survey, home insurance, moving, and any affordability test against income.</li>
           <li>Assumes the property is inside the City of Toronto, which is what the Toronto land transfer tax covers.</li>
         </ul>
       </details>

@@ -48,7 +48,7 @@ Both taxes are marginal: each rate applies only to the slice of the price inside
 
 ## Not covered, and why
 
-- Lender legal fees, title insurance, adjustments, home inspection, moving. No official source. The calculator has an input for "other closing costs", default zero.
+- Other closing costs (lawyer, title insurance, registration, inspection, appraisal) are estimated separately, with sources and confidence, in CLOSING_COSTS.md. Property tax and utility adjustments, surveys, insurance and moving are not estimated.
 - Maximum debt service ratios (GDS and TDS). Not verified, so the calculator shows the stress-test payment but does not judge affordability against income.
 - Mortgage compounding. Canadian fixed-rate mortgages are commonly compounded semi-annually, variable rates monthly. This is a convention, not verified here, so it is a labelled assumption with a switch.
 - First-time buyer programs such as the FHSA and Home Buyers' Plan. Not researched.
