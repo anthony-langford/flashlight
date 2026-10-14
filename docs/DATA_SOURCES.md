@@ -12,9 +12,23 @@ Everything marked VERIFIED was fetched on 2026-10-14. "Latest" values are from t
 | CMHC | Excel downloads, parsed locally | none | xlsx | VERIFIED (editions 2021 to 2025) |
 | TRREB | PDF reports, parsed locally | none | PDF | VERIFIED for Sept 2026 layout onward. Older layout unsupported |
 
+## Licensing and hosting readiness
+
+Terms were read on 2026-10-14. This is a plain-language summary, not legal advice. Everything below is fine for local personal use. The right-hand column is what changes if the app is ever hosted.
+
+| Source | Terms read | If hosted |
+|---|---|---|
+| Statistics Canada | [Open Licence](https://www.statcan.gc.ca/en/reference/licence) | Allowed, including commercial use, with the required attribution ("Source: Statistics Canada, product, reference date", or "Adapted from..." for derived figures) and no implied endorsement. |
+| Bank of Canada | [Terms](https://www.bankofcanada.ca/terms/) | Allowed with attribution to the Bank and a note of changes. Exchange rates are indicative and sourced from LSEG, so confirm before showing USD/CAD. Respect request limits. No logo use. |
+| FRED | [API terms](https://fred.stlouisfed.org/docs/api/terms_of_use.html) | Allowed with the required "not endorsed" notice. Must not replicate the FRED site. `MORTGAGE30US` is third-party (Freddie Mac) and needs permission. |
+| CMHC | [Terms](https://www.cmhc-schl.gc.ca/about-us/terms-conditions) | Not allowed without prior written consent (personal use only). A separate CMHC data licence agreement is referenced but was not found. Drop the four CMHC series or get consent. |
+| TRREB | Copyright notice on site | Not allowed. Personal use only. The export has `--no-trreb` to keep it out of anything hosted. |
+
+`npm run build` copies `app/public/data/` into `dist/`. Never host a `dist/` built from an export that included TRREB or CMHC data.
+
 ## Bank of Canada Valet
 
-Base: `https://www.bankofcanada.ca/valet/observations/{SERIES}/json` (also `/csv`). Add `?recent=N` for the last N observations. Series lists: `/valet/lists/series/json` (3.6 MB). No key. Terms: https://www.bankofcanada.ca/terms/ (not read yet).
+Base: `https://www.bankofcanada.ca/valet/observations/{SERIES}/json` (also `/csv`). Add `?recent=N` for the last N observations. Series lists: `/valet/lists/series/json` (3.6 MB). No key. Terms: https://www.bankofcanada.ca/terms/ (read 2026-10-14, see the licensing table).
 
 | Internal slug (proposed) | Valet ID | Meaning | Frequency | Latest seen |
 |---|---|---|---|---|
@@ -40,7 +54,7 @@ Notes:
 
 ## Statistics Canada
 
-Developer hub: https://www.statcan.gc.ca/en/developers. Terms and open licence: not read yet, must be read before hosting.
+Developer hub: https://www.statcan.gc.ca/en/developers. Terms: the Open Licence was read 2026-10-14, see the licensing table.
 
 Access paths:
 
@@ -145,7 +159,7 @@ Treat the district-to-neighbourhood mapping as a working assumption until checke
 2. **Typical discounted 5-year fixed mortgage rate.** No official series. Options: model as GoC 5-year yield plus an assumed spread, or a manually entered lender rate with a date.
 3. **Mortgage stress test floor.** The "greater of contract rate plus 2% or 5.25%" rule was stated from memory. It was not verified. Verify against OSFI before using it in the calculator.
 4. **Debt service ratio, household debt, wages, GDP, rents by unit type.** Not yet located. Candidates: StatCan household debt service ratio table, StatCan wage tables, CPI rent index.
-5. **StatCan and BoC licence terms** have not been read.
+5. ~~StatCan and BoC licence terms not read.~~ Read 2026-10-14. The CMHC data licence agreement page referenced by CMHC was not found.
 6. ~~WDS vector endpoints untested.~~ Done 2026-10-14, see above.
 7. ~~CMHC workbook not downloaded or inspected.~~ Done 2026-10-14. Remaining: rent for houses and condos is not covered by the survey tables loaded here.
 8. **TRREB** history before Sept 2026 (old PDF layout), current community report URL, and permission to reuse if hosting.

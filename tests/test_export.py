@@ -80,3 +80,19 @@ def test_series_without_data_is_skipped(tmp_path):
     conn = db.connect(":memory:")
     meta = export.export(conn, [_series("a.empty")], tmp_path, today=date(2026, 7, 1))
     assert meta["series"] == 0
+
+
+def test_no_trreb_writes_an_empty_payload(tmp_path):
+    conn = db.connect(":memory:")
+    from ingest.sources.trreb import DistrictRow
+
+    db.upsert_trreb(
+        conn,
+        [DistrictRow(date(2026, 9, 1), "Toronto E01", "detached", {"sales": 13.0})],
+    )
+    export.export(conn, [], tmp_path, today=date(2026, 10, 1), include_trreb=False)
+    payload = json.loads((tmp_path / "trreb.json").read_text())
+    assert payload["market"] == [] and payload["hpi"] == []
+    # and the default still exports it
+    export.export(conn, [], tmp_path, today=date(2026, 10, 1))
+    assert len(json.loads((tmp_path / "trreb.json").read_text())["market"]) == 1

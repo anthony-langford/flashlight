@@ -22,6 +22,17 @@ Flashlight is a personal learning tool for the Toronto housing market and surrou
 - Causal map edges are claims. Each needs a rationale and a confidence tag. Do not add unreviewed generated edges as "established".
 - Do not state mortgage or tax rules from memory. Verify against an official source first (see the README list).
 
+## Review loop (after every step)
+
+The owner asked for this on 2026-10-14. After each working unit, before committing:
+
+1. Run everything: `uv run ruff check .`, `uv run pytest -q`, and for front-end changes `cd app && npm test && npm run build`.
+2. Critically re-read your own diff as a skeptical reviewer. Look for: bugs and edge cases, unverified claims (especially numbers, rules and URLs written from memory), secrets or data leaking into git or logs, untrusted text inserted as HTML, stale or misleading labels, and anything a user could misread.
+3. For UI changes, render it (headless Chrome screenshots, light and dark) and look at the result. Tests passing is not enough.
+4. Fix what you find. If you cannot fix it now, add it to the README Open items.
+5. Note what the review found in the commit message or the README session log, then commit and push.
+6. At milestone boundaries, also call the advisor tool for an independent review.
+
 ## Style
 
 - No em dashes in any written content (docs, comments, commit messages). Use a period, comma, colon or "and".

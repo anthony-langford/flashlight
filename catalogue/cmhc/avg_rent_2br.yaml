@@ -19,6 +19,8 @@ explainer:
   - cmhc.toronto.vacancy_rate
   - cmhc.toronto.rent_change_2br
   - statcan.toronto.cpi_rented_accommodation
-licence_note: CMHC data. Terms not yet reviewed for hosting (https://www.cmhc-schl.gc.ca). Purpose-built
-  rental apartments of three units and over only.
+licence_note: 'CMHC terms (https://www.cmhc-schl.gc.ca/about-us/terms-conditions, read 2026-10-14): personal
+  use only. Redistribution, republishing and commercial use need CMHC''s prior written consent. A separate
+  CMHC data licence page exists but was not found. Purpose-built rental apartments of three units and
+  over only.'
 verified_on: '2026-10-14'

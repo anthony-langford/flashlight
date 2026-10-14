@@ -74,7 +74,7 @@ None of these are stated from memory in the docs. Verify each against an officia
 
 ## Open data items
 
-Tracked in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) under "Known gaps and open items". Highest priority: Toronto population components, StatCan, BoC and CMHC licence terms.
+Tracked in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) under "Known gaps and open items". Highest priority: Toronto population components, and CMHC data licence (personal use only until found or consent is given). Licence terms for all sources were read 2026-10-14, see the hosting table in docs/DATA_SOURCES.md.
 
 ## What it is
 
@@ -139,3 +139,4 @@ Educational project. Nothing here is financial, mortgage or real estate advice.
 | Date | Summary |
 |---|---|
 | 2026-10-14 | Explored idea and market. Chose scope (Toronto housing, no China). Verified BoC, StatCan and FRED series and Toronto coverage. CMHC and TRREB are file-based only. Created repo and docs, pushed. Recorded buyer profile. Installed uv and Python 3.12. Made README the status source of truth. Built BoC, FRED and StatCan clients (38 series) and a TRREB PDF parser (Sept 2026 layout). Installed poppler. Added CMHC rent, JSON export and the React app (Overview and Indicators). |
+| 2026-10-14 | Review pass 1 (self-review of M1 and M2). Fixed: staleness now computed at view time, district table can no longer mix months, chart holds the previous render while loading, export has `--no-trreb` and the UI handles it. Read the StatCan, BoC and CMHC terms: CMHC is personal use only, BoC FX is LSEG-sourced. Added the review loop to AGENTS.md. |

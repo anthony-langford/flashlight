@@ -14,5 +14,7 @@ explainer:
   moves_with:
   - boc.policy_rate
   - boc.prime_rate
-licence_note: Bank of Canada terms apply (https://www.bankofcanada.ca/terms/). Not yet reviewed for hosting.
+licence_note: 'Bank of Canada terms (https://www.bankofcanada.ca/terms/, read 2026-10-14): reuse allowed
+  with attribution to the Bank and a note of any changes, no endorsement implied. Do not exceed request
+  limits.'
 verified_on: '2026-10-14'

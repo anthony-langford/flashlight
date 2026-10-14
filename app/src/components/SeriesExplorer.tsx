@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { LAYER_LABELS, LAYER_ORDER, RANGES, loadSeries, sliceRange, type RangeKey } from "../data";
-import { fmtDate, fmtSigned, fmtValue, staleLabel } from "../format";
+import { daysSince, fmtDate, fmtSigned, fmtValue, staleLabel } from "../format";
 import type { Tokens } from "../theme";
 import type { SeriesData, SeriesSummary } from "../types";
 import { SeriesChart } from "./SeriesChart";
@@ -30,7 +30,6 @@ export function SeriesExplorer({ catalogue, tokens, initialId, onSelect }: Props
   const [range, setRange] = useState<RangeKey>("10Y");
   const [view, setView] = useState<"level" | "yoy">("yoy");
   const [data, setData] = useState<SeriesData | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const byId = useMemo(() => new Map(catalogue.map((s) => [s.id, s])), [catalogue]);
@@ -38,23 +37,25 @@ export function SeriesExplorer({ catalogue, tokens, initialId, onSelect }: Props
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     setError(null);
     loadSeries(selected.id)
       .then((d) => !cancelled && setData(d))
-      .catch((e: Error) => !cancelled && setError(e.message))
-      .finally(() => !cancelled && setLoading(false));
+      .catch((e: Error) => !cancelled && setError(e.message));
     return () => {
       cancelled = true;
     };
   }, [selected.id]);
 
+  // The chart keeps showing the previous series (dimmed) until the new one arrives, and it is
+  // described by the series it actually holds, not the one just selected.
+  const shown = data ? byId.get(data.id) : undefined;
+  const pending = !error && (!data || data.id !== selected.id);
   const index = isIndex(selected);
-  const showYoy = index && view === "yoy" && !!data?.yoy;
-  const base = data && data.id === selected.id ? (showYoy ? data.yoy! : data.obs) : null;
+  const showYoy = !!shown && isIndex(shown) && view === "yoy" && !!data?.yoy;
+  const base = data ? (showYoy ? data.yoy! : data.obs) : null;
   const points = useMemo(() => (base ? sliceRange(base, range) : []), [base, range]);
-  const unit = showYoy ? "percent" : selected.unit;
-  const name = showYoy ? `${selected.title}, year over year` : selected.title;
+  const unit = showYoy ? "percent" : (shown?.unit ?? selected.unit);
+  const name = shown ? (showYoy ? `${shown.title}, year over year` : shown.title) : selected.title;
 
   const groups = useMemo(() => {
     const m = new Map<string, SeriesSummary[]>();
@@ -135,14 +136,14 @@ export function SeriesExplorer({ catalogue, tokens, initialId, onSelect }: Props
           )}
         </div>
 
-        <div className={loading ? "chart-card loading" : "chart-card"}>
+        <div className={pending && points.length > 0 ? "chart-card loading" : "chart-card"}>
           {error ? (
             <p className="error">{error}</p>
           ) : points.length > 0 ? (
             <SeriesChart
               points={points}
               unit={unit}
-              frequency={selected.frequency}
+              frequency={(shown ?? selected).frequency}
               name={name}
               tokens={tokens}
             />
@@ -154,7 +155,7 @@ export function SeriesExplorer({ catalogue, tokens, initialId, onSelect }: Props
           <SeriesTable
             points={points}
             unit={unit}
-            frequency={selected.frequency}
+            frequency={(shown ?? selected).frequency}
             valueLabel={name}
           />
         )}
@@ -165,7 +166,7 @@ export function SeriesExplorer({ catalogue, tokens, initialId, onSelect }: Props
             <div className="fact-value">{fmtValue(selected.latest.value, selected.unit)}</div>
             <div className="muted small">
               {fmtDate(selected.latest.date, selected.frequency)} &middot;{" "}
-              {staleLabel(selected.stale_days)}
+              {staleLabel(daysSince(selected.latest.date))}
               {index && selected.yoy_pct !== null
                 ? ` \u00B7 ${fmtSigned(selected.yoy_pct, 1, "%")} year over year`
                 : ""}

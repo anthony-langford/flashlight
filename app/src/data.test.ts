@@ -31,6 +31,15 @@ describe("TRREB helpers", () => {
     hpi: [["2026-09-01", "Toronto E01", "sf_detached", 374.7, 1_382_900, -7.39]],
   });
 
+  it("does not fall back to an older month when the district is missing from the newest", () => {
+    const rows = [
+      ...market,
+      { ...market[0], period: "2026-10-01", area: "Toronto E02" },
+    ];
+    // newest period is October and E01 has no October row, so E01 must be absent, not August
+    expect(districtRow(rows, "E01", "detached")).toBeUndefined();
+    expect(districtRow(rows, "E01", "detached", "2026-09-01")?.sales).toBe(13);
+  });
   it("returns the latest period for a district and type", () => {
     expect(districtRow(market, "E01", "detached")?.sales).toBe(13);
     expect(districtRow(market, "E01", "semi_detached")?.sales).toBe(28);

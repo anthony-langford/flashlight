@@ -90,6 +90,7 @@ def export(
     catalogue: list[SeriesDef],
     out_dir: Path = DEFAULT_OUT,
     today: date | None = None,
+    include_trreb: bool = True,
 ) -> dict:
     today = today or date.today()
     (out_dir / "series").mkdir(parents=True, exist_ok=True)
@@ -114,7 +115,8 @@ def export(
     buyer = yaml.safe_load(BUYER_CONFIG.read_text(encoding="utf-8"))
     (out_dir / "buyer.json").write_text(json.dumps(buyer, indent=1))
 
-    trreb = _trreb_payload(conn)
+    # TRREB content is copyrighted. Leave it out of anything that may be hosted.
+    trreb = _trreb_payload(conn) if include_trreb else _empty_trreb()
     (out_dir / "trreb.json").write_text(json.dumps(trreb, separators=(",", ":")))
 
     meta = {
@@ -125,6 +127,10 @@ def export(
     }
     (out_dir / "meta.json").write_text(json.dumps(meta, indent=1))
     return meta
+
+
+def _empty_trreb() -> dict:
+    return {"market_columns": [], "market": [], "hpi_columns": [], "hpi": []}
 
 
 def _trreb_payload(conn: duckdb.DuckDBPyConnection) -> dict:

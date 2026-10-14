@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { districtHpi, districtRow, targetDistricts } from "../data";
+import { districtHpi, districtRow, latestPeriod, targetDistricts } from "../data";
 import { esc, fmtMoney, fmtMoneyCompact, fmtSigned } from "../format";
 import type { Tokens } from "../theme";
 import type { AppData } from "../types";
@@ -23,7 +23,8 @@ export function DistrictPanel({ data, tokens: t }: Props) {
   const { buyer, market, hpi } = data;
   const districts = useMemo(() => targetDistricts(buyer), [buyer]);
   const labels = buyer.district_labels;
-  const period = market.map((r) => r.period).sort().pop() ?? "";
+  const period = latestPeriod(market);
+  const hpiPeriod = latestPeriod(hpi);
   const monthName = period
     ? new Date(`${period}T00:00:00`).toLocaleDateString("en-CA", { month: "long", year: "numeric" })
     : "";
@@ -31,7 +32,7 @@ export function DistrictPanel({ data, tokens: t }: Props) {
   const option = useMemo(() => {
     const cats = [...districts].reverse(); // horizontal bars list top to bottom
     const pick = (type: string) =>
-      cats.map((d) => districtHpi(hpi, d, type)?.benchmark ?? null);
+      cats.map((d) => districtHpi(hpi, d, type, hpiPeriod)?.benchmark ?? null);
     const detached = pick("sf_detached");
     const attached = pick("sf_attached");
     const bar = (name: string, color: string, values: (number | null)[], withBand: boolean) => ({
@@ -79,7 +80,7 @@ export function DistrictPanel({ data, tokens: t }: Props) {
           const type = item.seriesName.includes("detached") && !item.seriesName.includes("attached")
             ? "sf_detached"
             : "sf_attached";
-          const row = districtHpi(hpi, item.name, type);
+          const row = districtHpi(hpi, item.name, type, hpiPeriod);
           return (
             `<div style="color:${t.ink2};font-size:12px">${esc(item.name)} ${esc(labels[item.name] ?? "")}</div>` +
             `<div style="display:flex;align-items:center;gap:6px;margin-top:2px">` +
@@ -112,7 +113,19 @@ export function DistrictPanel({ data, tokens: t }: Props) {
         bar("Single family attached", t.series2, attached, false),
       ],
     };
-  }, [districts, hpi, buyer.budget, labels, t]);
+  }, [districts, hpi, hpiPeriod, buyer.budget, labels, t]);
+
+  if (market.length === 0) {
+    return (
+      <section className="panel" aria-labelledby="districts-h">
+        <h2 id="districts-h">Your target districts</h2>
+        <p className="muted">
+          TRREB data is not included in this export. Run the export without <code>--no-trreb</code> on
+          your own machine to see district figures.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section className="panel" aria-labelledby="districts-h">
@@ -166,7 +179,7 @@ export function DistrictPanel({ data, tokens: t }: Props) {
           <tbody>
             {districts.flatMap((d) =>
               TYPES.map((ty) => {
-                const r = districtRow(market, d, ty.key);
+                const r = districtRow(market, d, ty.key, period);
                 if (!r) return null;
                 const ratio = r.sales && r.active_listings !== null ? r.active_listings / r.sales : null;
                 return (

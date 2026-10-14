@@ -81,21 +81,32 @@ export const LAYER_ORDER = [
   "affordability",
 ];
 
-/** Latest-period rows for one district and home type. */
+export function latestPeriod(rows: { period: string }[]): string {
+  return rows.reduce((max, r) => (r.period > max ? r.period : max), "");
+}
+
+/**
+ * Row for one district and home type in a given period (default: the newest period overall).
+ * Never falls back to an older month, so a table headed "September" cannot show August.
+ */
 export function districtRow(
   market: MarketRow[],
   district: string,
   homeType: string,
+  period: string = latestPeriod(market),
 ): MarketRow | undefined {
   const area = `Toronto ${district}`;
-  const rows = market.filter((r) => r.area === area && r.home_type === homeType);
-  return rows.sort((a, b) => b.period.localeCompare(a.period))[0];
+  return market.find((r) => r.area === area && r.home_type === homeType && r.period === period);
 }
 
-export function districtHpi(hpi: HpiRow[], district: string, homeType: string): HpiRow | undefined {
+export function districtHpi(
+  hpi: HpiRow[],
+  district: string,
+  homeType: string,
+  period: string = latestPeriod(hpi),
+): HpiRow | undefined {
   const area = `Toronto ${district}`;
-  const rows = hpi.filter((r) => r.area === area && r.home_type === homeType);
-  return rows.sort((a, b) => b.period.localeCompare(a.period))[0];
+  return hpi.find((r) => r.area === area && r.home_type === homeType && r.period === period);
 }
 
 /** Ordered list of districts across all target areas, without duplicates. */

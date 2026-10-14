@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { esc, isPercent, fmtDate, fmtMoneyCompact, fmtSigned, fmtValue, staleLabel } from "./format";
+import { daysSince, esc, isPercent, fmtDate, fmtMoneyCompact, fmtSigned, fmtValue, staleLabel } from "./format";
 
 describe("fmtValue", () => {
   it("formats by unit", () => {
@@ -57,5 +57,15 @@ describe("staleLabel", () => {
     expect(staleLabel(1)).toBe("1 day ago");
     expect(staleLabel(43)).toBe("43 days ago");
     expect(staleLabel(74)).toBe("2 months ago");
+  });
+});
+
+describe("daysSince", () => {
+  it("counts whole days from an ISO date at view time", () => {
+    const now = new Date(2026, 9, 14, 15, 30); // 14 Oct 2026, local
+    expect(daysSince("2026-10-14", now)).toBe(0);
+    expect(daysSince("2026-10-13", now)).toBe(1);
+    expect(daysSince("2026-08-01", now)).toBe(74);
+    expect(daysSince("2026-12-01", now)).toBe(0); // future dates never go negative
   });
 });

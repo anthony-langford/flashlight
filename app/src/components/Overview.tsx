@@ -1,4 +1,12 @@
-import { fmtDate, fmtMoneyCompact, fmtSigned, fmtValue, isPercent, staleLabel } from "../format";
+import {
+  daysSince,
+  fmtDate,
+  fmtMoneyCompact,
+  fmtSigned,
+  fmtValue,
+  isPercent,
+  staleLabel,
+} from "../format";
 import type { Tokens } from "../theme";
 import type { AppData, SeriesSummary } from "../types";
 import { DistrictPanel } from "./DistrictPanel";
@@ -32,7 +40,7 @@ function seriesTile(s: SeriesSummary, tile: Tile) {
       label={tile.label + (yoy ? ", year over year" : "")}
       value={value}
       delta={delta}
-      asOf={`${fmtDate(s.latest.date, s.frequency)} · ${staleLabel(s.stale_days)}`}
+      asOf={`${fmtDate(s.latest.date, s.frequency)} · ${staleLabel(daysSince(s.latest.date))}`}
     />
   );
 }

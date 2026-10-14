@@ -55,6 +55,14 @@ export function esc(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/** Whole days from an ISO date to today, in local time. Computed at view time, not export time. */
+export function daysSince(iso: string, now: Date = new Date()): number {
+  const [y, m, d] = iso.split("-").map(Number);
+  const then = Date.UTC(y, m - 1, d);
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.max(0, Math.round((today - then) / 86_400_000));
+}
+
 export function staleLabel(days: number): string {
   if (days <= 0) return "today";
   if (days === 1) return "1 day ago";

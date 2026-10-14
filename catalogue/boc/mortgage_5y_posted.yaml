@@ -15,7 +15,7 @@ explainer:
     below it. Compare changes, not the level.
   moves_with:
   - boc.gov_5y_yield
-licence_note: Bank of Canada terms apply (https://www.bankofcanada.ca/terms/). Not yet reviewed for hosting.
-  No official series exists for the typical discounted 5-year fixed rate. See docs/DATA_SOURCES.md open
-  items.
+licence_note: 'Bank of Canada terms (https://www.bankofcanada.ca/terms/, read 2026-10-14): reuse allowed
+  with attribution to the Bank and a note of any changes, no endorsement implied. Do not exceed request
+  limits.'
 verified_on: '2026-10-14'

@@ -73,12 +73,22 @@ def main(argv: list[str] | None = None) -> int:
     e = sub.add_parser("export", help="write static JSON for the front end")
     e.add_argument("--db", default=str(db.DEFAULT_DB_PATH))
     e.add_argument("--out", default=str(export_mod.DEFAULT_OUT))
+    e.add_argument(
+        "--no-trreb",
+        action="store_true",
+        help="leave TRREB data out (copyrighted), for output that may be hosted",
+    )
     args = parser.parse_args(argv)
 
     if args.cmd == "trreb":
         return run_trreb(args)
     if args.cmd == "export":
-        meta = export_mod.export(db.connect(args.db), load_catalogue(), Path(args.out))
+        meta = export_mod.export(
+            db.connect(args.db),
+            load_catalogue(),
+            Path(args.out),
+            include_trreb=not args.no_trreb,
+        )
         print(json.dumps(meta))
         return 0
     load_env()

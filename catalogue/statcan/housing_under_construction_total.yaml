@@ -16,5 +16,8 @@ explainer:
   moves_with:
   - statcan.toronto.housing_starts_total
   - statcan.toronto.housing_completions_total
-licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+licence_note: 'Statistics Canada Open Licence (https://www.statcan.gc.ca/en/reference/licence, read 2026-10-14):
+  use, redistribution and commercial use allowed. Attribution required: ''Source: Statistics Canada, <product>,
+  <reference date>'' (or ''Adapted from Statistics Canada, ...'' for derived works) with a statement that
+  StatCan does not endorse the product.'
 verified_on: '2026-10-14'
