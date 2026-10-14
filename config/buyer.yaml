@@ -1,0 +1,34 @@
+# Buyer profile. Stated by the owner on 2026-10-14. Drives defaults and which districts are highlighted.
+budget:
+  min: 1100000
+  max: 1350000
+timeline: "3 months to 1 year"
+property_types: [detached, semi_detached]
+
+# TRREB districts are the finest geography in the monthly Market Watch report.
+# `confidence` records how well the neighbourhood-to-district mapping is supported.
+# See docs/DATA_SOURCES.md, "Target areas and TRREB districts".
+target_areas:
+  - name: Riverdale
+    side: east
+    districts: [E01]
+    confidence: confident
+    note: TRREB 2019 community reports list North Riverdale, South Riverdale, Blake-Jones and Greenwood-Coxwell under E01.
+  - name: Monarch Park
+    side: east
+    districts: [E01, E02, E03]
+    confidence: unconfirmed
+    note: Not a TRREB community. Near Coxwell and Danforth. Candidate districts only. Needs the TDSB catchment compared with TRREB communities.
+  - name: Sunnylea
+    side: west
+    districts: [W07, W08]
+    confidence: unconfirmed
+    note: Not a TRREB community. Candidate districts only.
+
+# Human readable labels for TRREB districts that appear in the target areas.
+district_labels:
+  E01: Riverdale, Leslieville area
+  E02: The Beaches, East End-Danforth, Woodbine Corridor
+  E03: East York, Danforth, Playter Estates
+  W07: Stonegate-Queensway
+  W08: Etobicoke (Kingsway South, Edenbridge-Humber Valley, Islington-City Centre West and others)

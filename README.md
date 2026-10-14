@@ -22,7 +22,7 @@ Last updated: 2026-10-14. Phase: M1 (data foundation) in progress. No applicatio
 - [x] StatCan client (vector-based, verified live; matches results by vector id because the API reorders batches). Retry with backoff for transient errors
 - [x] TRREB Market Watch parser: monthly district tables by home type (sales, prices, listings, SP/LP, days on market). Verified on Sept 2026 PDF (760 rows). `uv run python -m ingest trreb --from 2026-09`. MLS HPI benchmark prices by district also parsed (343 rows, positions-based). Older PDF layouts unsupported
 - [x] CMHC Rental Market Survey (Toronto CMA vacancy, turnover, two-bedroom rent and change; editions 2021 to 2025 downloaded and parsed). 4 series. Purpose-built apartments only
-- [ ] Export step to JSON
+- [x] Export step: `uv run python -m ingest export` writes catalogue summaries (latest value, 1-year change, year-over-year for index series, percentile, staleness), per-series JSON and TRREB tables to `app/public/data/` (gitignored). Buyer profile in `config/buyer.yaml`
 - [ ] React app scaffolded
 - [ ] First views, then causal map
 
@@ -39,7 +39,7 @@ Stated by the owner on 2026-10-14.
 ## Next steps
 
 1. TRREB: find a way to recover history before Sept 2026 (older PDF layout). Until then history builds month by month.
-2. Export to JSON (with derived series such as year-over-year change and percentiles), then scaffold the React app.
+2. Scaffold the React app (Vite, TypeScript, ECharts) and build the first views from the exported JSON.
 
 ## Milestones
 

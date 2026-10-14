@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import sys
 from datetime import date
+from pathlib import Path
 
 import httpx
 
 from ingest import db
+from ingest import export as export_mod
 from ingest.catalogue import load_catalogue
 from ingest.config import load_env
 from ingest.sources import trreb
@@ -67,10 +70,17 @@ def main(argv: list[str] | None = None) -> int:
     t.add_argument("--from", dest="start", required=True, help="first month, YYYY-MM")
     t.add_argument("--to", dest="end", help="last month, YYYY-MM (default: current month)")
     t.add_argument("--db", default=str(db.DEFAULT_DB_PATH))
+    e = sub.add_parser("export", help="write static JSON for the front end")
+    e.add_argument("--db", default=str(db.DEFAULT_DB_PATH))
+    e.add_argument("--out", default=str(export_mod.DEFAULT_OUT))
     args = parser.parse_args(argv)
 
     if args.cmd == "trreb":
         return run_trreb(args)
+    if args.cmd == "export":
+        meta = export_mod.export(db.connect(args.db), load_catalogue(), Path(args.out))
+        print(json.dumps(meta))
+        return 0
     load_env()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     # httpx logs full request URLs at INFO, which would include API keys.
