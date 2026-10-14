@@ -1,0 +1,50 @@
+# Secrets and local config
+.env
+.env.*
+!.env.example
+
+# Data (third-party, not redistributed). Manual-entry templates are tracked.
+data/*
+!data/.gitkeep
+!data/manual/
+data/manual/*
+!data/manual/*.template.csv
+*.duckdb
+*.duckdb.wal
+*.parquet
+
+# Generated front-end data
+app/public/data/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Node
+node_modules/
+app/dist/
+.vite/
+*.tsbuildinfo
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Logs and scratch
+*.log
+tmp/
+scratch/
