@@ -37,8 +37,10 @@ def run_trreb(args: argparse.Namespace) -> int:
                 else:
                     rows = trreb.parse_text(trreb.pdf_to_text(path))
                     db.upsert_trreb(conn, rows)
+                    hpi = trreb.parse_hpi(trreb.pdf_to_bbox(path)) if rows else []
+                    db.upsert_hpi(conn, hpi)
                     if rows:
-                        print(f"{year}-{month:02d}  {len(rows)} rows")
+                        print(f"{year}-{month:02d}  {len(rows)} rows, {len(hpi)} HPI rows")
                     else:
                         print(
                             f"{year}-{month:02d}  layout not supported "

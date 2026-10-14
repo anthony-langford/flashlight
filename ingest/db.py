@@ -44,6 +44,15 @@ CREATE TABLE IF NOT EXISTS trreb_monthly (
     pdom DOUBLE,
     PRIMARY KEY (period, area, home_type)
 );
+CREATE TABLE IF NOT EXISTS trreb_hpi (
+    period DATE NOT NULL,
+    area VARCHAR NOT NULL,
+    home_type VARCHAR NOT NULL,
+    idx DOUBLE,
+    benchmark DOUBLE,
+    yoy_pct DOUBLE,
+    PRIMARY KEY (period, area, home_type)
+);
 CREATE TABLE IF NOT EXISTS fetch_log (
     series_id VARCHAR NOT NULL,
     fetched_at TIMESTAMP NOT NULL,
@@ -120,4 +129,14 @@ def upsert_trreb(conn: duckdb.DuckDBPyConnection, rows: list) -> None:
     conn.executemany(
         f"INSERT OR REPLACE INTO trreb_monthly VALUES ({placeholders})",
         [[r.period, r.area, r.home_type, *(r.values.get(f) for f in TRREB_FIELDS)] for r in rows],
+    )
+
+
+def upsert_hpi(conn: duckdb.DuckDBPyConnection, rows: list) -> None:
+    """Upsert MLS HPI benchmark rows (ingest.sources.trreb.HpiRow)."""
+    if not rows:
+        return
+    conn.executemany(
+        "INSERT OR REPLACE INTO trreb_hpi VALUES (?, ?, ?, ?, ?, ?)",
+        [[r.period, r.area, r.home_type, r.index, r.benchmark, r.yoy_pct] for r in rows],
     )

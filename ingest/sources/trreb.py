@@ -7,6 +7,7 @@ We parse the monthly tables only. Year-to-date tables are skipped, they can be d
 
 from __future__ import annotations
 
+import html
 import logging
 import re
 import subprocess
@@ -179,3 +180,103 @@ def pdf_to_text(path: Path) -> str:
         check=True,
     )
     return result.stdout
+
+
+# --- MLS Home Price Index (HPI) benchmark pages -------------------------------------------------
+# Rows can lack whole home-type groups (for example no townhouse benchmark in a district), so
+# text order is ambiguous. We assign each number to a group by its x position instead.
+
+HPI_TYPES = ["composite", "sf_detached", "sf_attached", "townhouse", "apartment"]
+
+_WORD = re.compile(
+    r'<word xMin="(?P<x0>[\d.]+)" yMin="(?P<y0>[\d.]+)" '
+    r'xMax="[\d.]+" yMax="[\d.]+">(?P<t>.*?)</word>'
+)
+_HPI_TITLE = re.compile(r"Home Price Index.*?, (?P<month>[A-Za-z]+) (?P<year>\d{4})\s*$")
+
+
+@dataclass(frozen=True)
+class HpiRow:
+    period: date
+    area: str
+    home_type: str
+    index: float
+    benchmark: float
+    yoy_pct: float
+
+
+def pdf_to_bbox(path: Path) -> str:
+    """Word positions for every page, as poppler's bbox HTML."""
+    result = subprocess.run(
+        ["pdftotext", "-bbox", str(path), "-"], capture_output=True, text=True, check=True
+    )
+    return result.stdout
+
+
+def _page_lines(page_html: str) -> list[list[tuple[float, str]]]:
+    """Group words into lines by y position. Each line is [(x, text), ...] sorted by x."""
+    words = sorted(
+        (float(m["y0"]), float(m["x0"]), html.unescape(m["t"])) for m in _WORD.finditer(page_html)
+    )
+    lines: list[tuple[float, list[tuple[float, str]]]] = []
+    for y, x, text in words:
+        if lines and abs(lines[-1][0] - y) <= 2.5:
+            lines[-1][1].append((x, text))
+        else:
+            lines.append((y, [(x, text)]))
+    return [sorted(ws) for _, ws in lines]
+
+
+def _group_starts(lines: list[list[tuple[float, str]]]) -> list[float]:
+    # Only header rows (they also hold "Benchmark"), not the page title which contains "Index".
+    xs = sorted(
+        {
+            x
+            for line in lines
+            if any(t == "Benchmark" for _, t in line)
+            for x, t in line
+            if t == "Index"
+        }
+    )
+    starts: list[float] = []
+    for x in xs:
+        if not starts or x - starts[-1] > 20:
+            starts.append(x)
+    return starts
+
+
+def parse_hpi(bbox_html: str) -> list[HpiRow]:
+    """Parse benchmark rows from `pdftotext -bbox` output of a Market Watch PDF."""
+    rows: list[HpiRow] = []
+    for page in bbox_html.split("<page ")[1:]:
+        lines = _page_lines(page)
+        period: date | None = None
+        for line in lines:
+            m = _HPI_TITLE.search(" ".join(t for _, t in line))
+            if m and m["month"] in MONTHS:
+                period = date(int(m["year"]), MONTHS[m["month"]], 1)
+        if period is None:
+            continue
+        starts = _group_starts(lines)
+        if len(starts) != len(HPI_TYPES):
+            log.warning("HPI page has %d column groups, expected %d", len(starts), len(HPI_TYPES))
+            continue
+        for line in lines:
+            first_num = next((i for i, (_, t) in enumerate(line) if _NUMERIC.match(t)), None)
+            if not first_num:
+                continue
+            area = " ".join(t for _, t in line[:first_num])
+            nums = line[first_num:]
+            if len(nums) < 3 or len(nums) % 3:
+                continue
+            groups: dict[int, list[float]] = {}
+            for x, t in nums:
+                g = max((i for i, s in enumerate(starts) if x >= s - 15), default=None)
+                if g is None:
+                    break
+                groups.setdefault(g, []).append(_num(t))
+            else:
+                for g, vals in groups.items():
+                    if len(vals) == 3:
+                        rows.append(HpiRow(period, area, HPI_TYPES[g], *vals))
+    return rows

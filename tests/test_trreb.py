@@ -99,3 +99,81 @@ def test_upsert_is_idempotent():
 def test_pdf_path_naming(tmp_path):
     assert trreb.pdf_path(2026, 9, tmp_path).name == "mw2609.pdf"
     assert trreb.pdf_path(2025, 12, tmp_path).name == "mw2512.pdf"
+
+
+def _word(x, y, text):
+    return f'<word xMin="{x}" yMin="{y}" xMax="{x + 40}" yMax="{y + 8}">{text}</word>'
+
+
+def _hpi_page():
+    """Synthetic bbox page: composite, detached, attached, townhouse, apartment at fixed x."""
+    starts = [190, 485, 785, 1075, 1355]
+    w = [
+        _word(263, 60, "MLS"),
+        _word(300, 60, "Home"),
+        _word(330, 60, "Price"),
+        _word(360, 60, "Index"),
+    ]
+    w += [_word(500, 60, "City"), _word(530, 60, "of"), _word(550, 60, "Toronto,")]
+    w += [_word(600, 60, "September"), _word(650, 60, "2026")]
+    for s in starts:  # header row
+        w += [
+            _word(s, 157, "Index"),
+            _word(s + 70, 157, "Benchmark"),
+            _word(s + 180, 157, "Yr./Yr"),
+        ]
+
+    def row(y, area, groups):
+        out = [_word(31, y, "Toronto"), _word(87, y, area)]
+        for g, (idx, bench, yoy) in groups.items():
+            s = starts[g]
+            out += [_word(s + 4, y, idx), _word(s + 75, y, bench), _word(s + 200, y, yoy)]
+        return out
+
+    w += row(
+        300,
+        "E01",
+        {
+            0: ("327.9", "$1,032,000", "-4.26%"),
+            1: ("374.7", "$1,382,900", "-7.39%"),
+            2: ("367.4", "$1,185,200", "-5.60%"),
+            3: ("415.8", "$769,700", "-8.43%"),
+            4: ("267.2", "$595,300", "-4.47%"),
+        },
+    )
+    # W07 has no townhouse group: apartment must still land in the apartment column
+    w += row(
+        330,
+        "W07",
+        {
+            0: ("258.9", "$1,257,900", "2.45%"),
+            1: ("298.9", "$1,485,300", "2.54%"),
+            2: ("297.7", "$1,215,700", "6.32%"),
+            4: ("108.1", "$530,000", "-3.40%"),
+        },
+    )
+    return '<page width="1700" height="900">' + "".join(w) + "</page>"
+
+
+def test_parse_hpi_assigns_columns_by_position():
+    rows = trreb.parse_hpi("<doc>" + _hpi_page() + "</doc>")
+    got = {(r.area, r.home_type): r for r in rows}
+    assert got[("Toronto E01", "sf_detached")].benchmark == 1_382_900
+    assert got[("Toronto E01", "townhouse")].yoy_pct == -8.43
+    assert ("Toronto W07", "townhouse") not in got
+    assert got[("Toronto W07", "apartment")].benchmark == 530_000
+    assert got[("Toronto W07", "sf_attached")].yoy_pct == 6.32
+    assert all(r.period == date(2026, 9, 1) for r in rows)
+
+
+def test_parse_hpi_ignores_pages_without_hpi_title():
+    page = '<page width="100" height="100">' + _word(10, 10, "Hello") + "</page>"
+    assert trreb.parse_hpi("<doc>" + page + "</doc>") == []
+
+
+def test_hpi_upsert_is_idempotent():
+    conn = db.connect(":memory:")
+    rows = trreb.parse_hpi("<doc>" + _hpi_page() + "</doc>")
+    db.upsert_hpi(conn, rows)
+    db.upsert_hpi(conn, rows)
+    assert conn.execute("SELECT count(*) FROM trreb_hpi").fetchone()[0] == len(rows)

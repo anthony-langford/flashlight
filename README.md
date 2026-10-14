@@ -20,7 +20,7 @@ Last updated: 2026-10-14. Phase: M1 (data foundation) in progress. No applicatio
 - [x] DuckDB schema, idempotent upserts, 45-day revision lookback, per-series error isolation
 - [x] FRED client (key via `.env`, redacted from logs, errors and the DB; tests). 8 FRED series plus BoC USD/CAD synced live 2026-10-14
 - [x] StatCan client (vector-based, verified live; matches results by vector id because the API reorders batches). Retry with backoff for transient errors
-- [x] TRREB Market Watch parser: monthly district tables by home type (sales, prices, listings, SP/LP, days on market). Verified on Sept 2026 PDF (760 rows). `uv run python -m ingest trreb --from 2026-09`. Older PDF layouts unsupported, HPI benchmark pages not parsed yet
+- [x] TRREB Market Watch parser: monthly district tables by home type (sales, prices, listings, SP/LP, days on market). Verified on Sept 2026 PDF (760 rows). `uv run python -m ingest trreb --from 2026-09`. MLS HPI benchmark prices by district also parsed (343 rows, positions-based). Older PDF layouts unsupported
 - [ ] CMHC rent workbook (annual Excel, manual download, not yet inspected)
 - [ ] Export step to JSON
 - [ ] React app scaffolded
@@ -38,7 +38,7 @@ Stated by the owner on 2026-10-14.
 
 ## Next steps
 
-1. TRREB: parse the MLS HPI benchmark pages (best price series, needs word positions), and find a way to recover history before Sept 2026.
+1. TRREB: find a way to recover history before Sept 2026 (older PDF layout). Until then history builds month by month.
 2. CMHC rent workbook: download and inspect, add Toronto vacancy and average rent.
 3. Export to JSON (with derived series such as year-over-year change and percentiles), then scaffold the React app.
 
