@@ -1,0 +1,19 @@
+id: boc.gov_10y_yield
+title: Government of Canada benchmark bond yield, 10-year
+source: boc_valet
+source_id: BD.CDN.10YR.DQ.YLD
+frequency: daily
+unit: percent
+geography: Canada
+layer: rates_credit
+explainer:
+  what: The yield on a 10-year Government of Canada bond.
+  why_it_matters: A long-term benchmark for borrowing costs and growth and inflation expectations. It
+    co-moves strongly with the US 10-year yield.
+  how_to_read: Compare it with the 2-year yield. A flat or inverted gap has historically signalled a slowing
+    economy.
+  moves_with:
+  - boc.gov_5y_yield
+  - fred.ust_10y
+licence_note: Bank of Canada terms apply (https://www.bankofcanada.ca/terms/). Not yet reviewed for hosting.
+verified_on: '2026-10-14'

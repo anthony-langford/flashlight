@@ -1,0 +1,20 @@
+id: boc.prime_rate
+title: Prime rate (chartered banks)
+source: boc_valet
+source_id: V80691311
+frequency: weekly
+unit: percent
+geography: Canada
+layer: rates_credit
+explainer:
+  what: The base rate banks use to price variable-rate loans, including variable mortgages and lines of
+    credit. Each bank sets its own, but they move together.
+  why_it_matters: Variable mortgage rates are quoted as prime plus or minus a spread, so a change here
+    changes the monthly payment directly.
+  how_to_read: It tracks the policy rate at a roughly fixed gap. A change in the gap would be unusual
+    and worth investigating.
+  moves_with:
+  - boc.policy_rate
+  - boc.mortgage_5y_variable_est
+licence_note: Bank of Canada terms apply (https://www.bankofcanada.ca/terms/). Not yet reviewed for hosting.
+verified_on: '2026-10-14'

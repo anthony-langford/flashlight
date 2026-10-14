@@ -1,0 +1,21 @@
+id: boc.policy_rate
+title: Bank of Canada policy rate (target for the overnight rate)
+source: boc_valet
+source_id: V39079
+frequency: daily
+unit: percent
+geography: Canada
+layer: rates_credit
+explainer:
+  what: The rate the Bank of Canada wants to see for overnight lending between financial institutions.
+    It is the Bank's main tool for steering inflation.
+  why_it_matters: It sets the floor for prime and variable mortgage rates and influences the whole yield
+    curve through expectations of where it will go next.
+  how_to_read: Compare it with inflation and with its own history. Markets usually move before the Bank
+    does, so the 2-year yield often shifts ahead of a decision.
+  moves_with:
+  - boc.prime_rate
+  - boc.gov_2y_yield
+  - boc.mortgage_5y_variable_est
+licence_note: Bank of Canada terms apply (https://www.bankofcanada.ca/terms/). Not yet reviewed for hosting.
+verified_on: '2026-10-14'

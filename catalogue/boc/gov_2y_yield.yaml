@@ -1,0 +1,19 @@
+id: boc.gov_2y_yield
+title: Government of Canada benchmark bond yield, 2-year
+source: boc_valet
+source_id: BD.CDN.2YR.DQ.YLD
+frequency: daily
+unit: percent
+geography: Canada
+layer: rates_credit
+explainer:
+  what: The yield on a 2-year Government of Canada bond.
+  why_it_matters: It reflects what the market expects the Bank of Canada to do over the next couple of
+    years, and it anchors short fixed mortgage terms.
+  how_to_read: If it sits below the policy rate, the market is pricing in cuts. If above, hikes.
+  moves_with:
+  - boc.policy_rate
+  - boc.gov_5y_yield
+  - fred.ust_2y
+licence_note: Bank of Canada terms apply (https://www.bankofcanada.ca/terms/). Not yet reviewed for hosting.
+verified_on: '2026-10-14'

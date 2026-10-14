@@ -1,0 +1,21 @@
+id: boc.cpi_trim
+title: CPI-trim (core inflation)
+source: boc_valet
+source_id: CPI_TRIM
+frequency: monthly
+unit: percent (year over year)
+geography: Canada
+layer: canada_macro
+explainer:
+  what: A core inflation measure that drops the most extreme price changes each month and averages the
+    rest.
+  why_it_matters: The Bank of Canada watches core measures to judge whether inflation is persistent. Sticky
+    core inflation makes cuts less likely.
+  how_to_read: The Bank targets 2 percent for headline CPI. Core measures well above that argue against
+    rate cuts.
+  moves_with:
+  - boc.cpi_median
+  - boc.cpi_common
+  - boc.policy_rate
+licence_note: Bank of Canada terms apply (https://www.bankofcanada.ca/terms/). Not yet reviewed for hosting.
+verified_on: '2026-10-14'

@@ -1,0 +1,20 @@
+id: boc.cpi_median
+title: CPI-median (core inflation)
+source: boc_valet
+source_id: CPI_MEDIAN
+frequency: monthly
+unit: percent (year over year)
+geography: Canada
+layer: canada_macro
+explainer:
+  what: 'A core inflation measure: the price change of the component sitting in the middle of all CPI
+    components.'
+  why_it_matters: Less affected by outliers than headline CPI, so it gives a cleaner read on underlying
+    inflation for the Bank's decisions.
+  how_to_read: Look at it together with CPI-trim and CPI-common. If all three agree, the signal is stronger.
+  moves_with:
+  - boc.cpi_trim
+  - boc.cpi_common
+  - boc.policy_rate
+licence_note: Bank of Canada terms apply (https://www.bankofcanada.ca/terms/). Not yet reviewed for hosting.
+verified_on: '2026-10-14'

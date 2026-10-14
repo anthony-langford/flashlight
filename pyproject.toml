@@ -1,0 +1,34 @@
+[project]
+name = "flashlight"
+version = "0.1.0"
+description = "Personal learning tool for the Toronto housing market and macro environment"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+dependencies = [
+    "duckdb>=1.1",
+    "httpx>=0.27",
+    "pydantic>=2.8",
+    "pyyaml>=6.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "respx>=0.21",
+    "ruff>=0.6",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

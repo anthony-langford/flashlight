@@ -1,0 +1,19 @@
+id: boc.cpi_common
+title: CPI-common (core inflation)
+source: boc_valet
+source_id: CPI_COMMON
+frequency: monthly
+unit: percent (year over year)
+geography: Canada
+layer: canada_macro
+explainer:
+  what: A core inflation measure that isolates price movements shared across many CPI components.
+  why_it_matters: It captures broad, economy-wide inflation pressure rather than one-off price moves in
+    single categories.
+  how_to_read: It moves slowly. A sustained rise is a stronger signal than a one-month change.
+  moves_with:
+  - boc.cpi_trim
+  - boc.cpi_median
+  - boc.policy_rate
+licence_note: Bank of Canada terms apply (https://www.bankofcanada.ca/terms/). Not yet reviewed for hosting.
+verified_on: '2026-10-14'

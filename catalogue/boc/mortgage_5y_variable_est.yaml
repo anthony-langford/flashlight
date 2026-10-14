@@ -1,0 +1,18 @@
+id: boc.mortgage_5y_variable_est
+title: Estimated variable mortgage rate (5-year term)
+source: boc_valet
+source_id: BROKER_AVERAGE_5YR_VRM
+frequency: weekly
+unit: percent
+geography: Canada
+layer: rates_credit
+explainer:
+  what: The Bank of Canada's estimate of the average variable mortgage rate, based on broker data.
+  why_it_matters: It shows what variable-rate borrowers are actually paying, which is closer to reality
+    than the posted fixed rate.
+  how_to_read: Compare it with the policy rate and prime. Spreads to prime shift with competition.
+  moves_with:
+  - boc.policy_rate
+  - boc.prime_rate
+licence_note: Bank of Canada terms apply (https://www.bankofcanada.ca/terms/). Not yet reviewed for hosting.
+verified_on: '2026-10-14'

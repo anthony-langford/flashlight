@@ -14,8 +14,8 @@ Last updated: 2026-10-14. Phase: M1 (data foundation) in progress. No applicatio
 - [x] Data source feasibility checked ([docs/DATA_SOURCES.md](docs/DATA_SOURCES.md))
 - [x] Repo, license, gitignore, design docs
 - [x] Toolchain: `uv` 0.13 and managed Python 3.12 installed (via Homebrew), Node 26 available
-- [ ] Python project scaffolded (`pyproject.toml`, `ingest/` package, tests)
-- [ ] Series catalogue (YAML) for the v1 series
+- [x] Python project scaffolded (`pyproject.toml`, `ingest/` package, pytest, ruff)
+- [ ] Series catalogue (YAML) for the v1 series: Bank of Canada done (10 series, explainers drafted, awaiting owner review). FRED, StatCan, manual still to do
 - [ ] Bank of Canada Valet client
 - [ ] DuckDB schema and loader
 - [ ] FRED client
@@ -37,11 +37,10 @@ Stated by the owner on 2026-10-14.
 
 ## Next steps
 
-1. Scaffold the Python project and catalogue.
-2. Bank of Canada Valet client with tests, then DuckDB loader.
-3. FRED client, then StatCan client (take Toronto vector IDs from the full-table CSVs, then test the WDS vector endpoints).
-4. Manual-entry templates: TRREB monthly by district and property type, CMHC rent.
-5. Export to JSON, then scaffold the React app.
+1. Bank of Canada Valet client with tests, then DuckDB loader and a `sync` command.
+2. FRED client, then StatCan client (take Toronto vector IDs from the full-table CSVs, then test the WDS vector endpoints).
+3. Manual-entry templates: TRREB monthly by district and property type, CMHC rent.
+4. Export to JSON, then scaffold the React app.
 
 ## Milestones
 
@@ -99,7 +98,15 @@ If you are picking this project up fresh (new chat, fork or agent), read [AGENTS
 
 ## Development
 
-Requires `uv` and Node. Copy `.env.example` to `.env` and set `FRED_API_KEY`. Commands will be added here as the code lands.
+Requires `uv` and Node. Copy `.env.example` to `.env` and set `FRED_API_KEY`.
+
+```
+uv sync              # install Python deps (uses Python 3.12)
+uv run pytest        # tests
+uv run ruff check .  # lint
+```
+
+More commands are added here as the code lands.
 
 ## Maintaining this file
 

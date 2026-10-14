@@ -1,0 +1,21 @@
+id: boc.gov_5y_yield
+title: Government of Canada benchmark bond yield, 5-year
+source: boc_valet
+source_id: BD.CDN.5YR.DQ.YLD
+frequency: daily
+unit: percent
+geography: Canada
+layer: rates_credit
+explainer:
+  what: The yield on a 5-year Government of Canada bond.
+  why_it_matters: Lenders fund fixed-rate mortgages with bond-market money, so 5-year fixed mortgage rates
+    follow this yield plus a margin. It is the most important single rate for a fixed-rate buyer.
+  how_to_read: Watch the change over weeks, not days. A sustained move of several tenths of a point usually
+    passes through to quoted fixed rates within weeks.
+  moves_with:
+  - boc.mortgage_5y_posted
+  - boc.gov_2y_yield
+  - boc.gov_10y_yield
+  - fred.ust_10y
+licence_note: Bank of Canada terms apply (https://www.bankofcanada.ca/terms/). Not yet reviewed for hosting.
+verified_on: '2026-10-14'
