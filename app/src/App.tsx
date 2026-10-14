@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CausalMap } from "./components/CausalMap";
 import { AffordabilityPanel } from "./components/AffordabilityPanel";
 import { Overview } from "./components/Overview";
 import { SeriesExplorer } from "./components/SeriesExplorer";
@@ -6,7 +7,14 @@ import { loadAll } from "./data";
 import { useTheme, type ThemeMode } from "./theme";
 import type { AppData } from "./types";
 
-type Tab = "overview" | "indicators" | "affordability";
+type Tab = "overview" | "indicators" | "map" | "affordability";
+
+const TAB_LABELS: Record<Tab, string> = {
+  overview: "Overview",
+  indicators: "Indicators",
+  map: "Causal map",
+  affordability: "Affordability",
+};
 
 /**
  * `#/indicators/boc.gov_5y_yield` selects a tab and an indicator.
@@ -15,7 +23,7 @@ type Tab = "overview" | "indicators" | "affordability";
 function parseHash(): { tab: Tab; id?: string; params: URLSearchParams } {
   const [path, query = ""] = window.location.hash.replace(/^#/, "").split("?");
   const [, tab, id] = path.split("/");
-  const known: Tab[] = ["overview", "indicators", "affordability"];
+  const known: Tab[] = ["overview", "indicators", "map", "affordability"];
   return {
     tab: known.includes(tab as Tab) ? (tab as Tab) : "overview",
     id: id ? decodeURIComponent(id) : undefined,
@@ -50,7 +58,7 @@ export default function App() {
           <span className="muted">Toronto housing, explained</span>
         </div>
         <nav aria-label="Sections" className="tabs">
-          {(["overview", "indicators", "affordability"] as const).map((t) => (
+          {(["overview", "indicators", "map", "affordability"] as const).map((t) => (
             <button
               key={t}
               type="button"
@@ -60,7 +68,7 @@ export default function App() {
                 window.location.hash = `#/${t}`;
               }}
             >
-              {t === "overview" ? "Overview" : t === "indicators" ? "Indicators" : "Affordability"}
+              {TAB_LABELS[t]}
             </button>
           ))}
         </nav>
@@ -78,6 +86,7 @@ export default function App() {
         {error && <p className="error">{error}</p>}
         {!data && !error && <p className="muted">Loading&hellip;</p>}
         {data && tab === "overview" && <Overview data={data} tokens={tokens} />}
+        {data && tab === "map" && <CausalMap data={data} tokens={tokens} params={route.params} />}
         {data && tab === "affordability" && <AffordabilityPanel data={data} params={route.params} />}
         {data && tab === "indicators" && (
           <SeriesExplorer

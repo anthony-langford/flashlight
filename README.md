@@ -8,7 +8,7 @@ Flashlight pulls public economic and housing data, explains each indicator in pl
 
 ## Status
 
-Last updated: 2026-10-14. Phase: M1 (data), M2 (export and first UI) and the M4 calculator done. M3 (causal map) is next.
+Last updated: 2026-10-14. Phase: M1 (data), M2 (export and first UI), M3 (causal map) and the M4 calculator done. Next: owner review, then refinements.
 
 - [x] Idea explored, market scanned, scope agreed ([docs/PROJECT.md](docs/PROJECT.md))
 - [x] Data source feasibility checked ([docs/DATA_SOURCES.md](docs/DATA_SOURCES.md))
@@ -24,7 +24,8 @@ Last updated: 2026-10-14. Phase: M1 (data), M2 (export and first UI) and the M4 
 - [x] CMHC Rental Market Survey (Toronto CMA vacancy, turnover, two-bedroom rent and change; editions 2021 to 2025 downloaded and parsed). 4 series. Purpose-built apartments only
 - [x] Export step: `uv run python -m ingest export` writes catalogue summaries (latest value, 1-year change, year-over-year for index series, percentile, staleness), per-series JSON and TRREB tables to `app/public/data/` (gitignored). Buyer profile in `config/buyer.yaml`
 - [x] React app (Vite, TypeScript, ECharts) with two views: Overview (market snapshot tiles, target-district HPI benchmark chart against your budget band, district sales table) and Indicators (all 42 series with range filter, year-over-year toggle for index series, table view, percentile meter, draft explainers, source and licence). Light and dark themes, colors validated. Linkable via `#/indicators/<series id>`. 12 unit tests
-- [ ] Causal map (M3), owner review of drafted explainers and edges
+- [x] Causal map (M3): validated graph in `graph/` (19 nodes, 19 edges, all drafts), per-edge data check on monthly changes (8 consistent, 1 insufficient, 10 no long series), accessible SVG map with node readouts, edge detail, shock tracing (illustrative, not a forecast), table twin, linkable views. See docs/CAUSAL_MAP.md
+- [ ] Owner review of the drafted explainers and the 19 edges
 - [x] Mortgage rules verified from official pages (docs/MORTGAGE_RULES.md) and Affordability tab built: monthly payment, stress-test payment, cash needed at closing with land transfer taxes and rebates, sensitivity grid across your budget and rates, scenarios presettable from the URL. 16 tests against independently computed values
 
 ## Buyer profile (drives priorities)
@@ -40,14 +41,14 @@ Stated by the owner on 2026-10-14.
 ## Next steps
 
 1. TRREB: find a way to recover history before Sept 2026 (older PDF layout). Until then history builds month by month.
-2. Causal map: nodes and edges from `graph/`, React Flow view, node state colouring (M3). Needs owner review of the draft edges in docs/CAUSAL_MAP.md.
+2. Owner review of the 19 draft edges (`graph/edges.yaml`) and the drafted explainers. Add edges for immigration policy and the stress test if you agree.
 3. Ask the owner: first-time buyer? Which rate to assume? Then refine the calculator defaults.
 
 ## Milestones
 
 - **M1 Data foundation:** ingestion, catalogue, DuckDB, tests (current)
 - **M2 Export and first UI:** done. See Status
-- **M3 Causal map:** React Flow view, owner review of draft edges, lead/lag evidence ([docs/CAUSAL_MAP.md](docs/CAUSAL_MAP.md))
+- **M3 Causal map:** done except owner review of the draft edges ([docs/CAUSAL_MAP.md](docs/CAUSAL_MAP.md))
 - **M4 Housing tools:** payment calculator and closing costs (done), release calendar (open)
 - **M5 Discovery and polish:** LLM-assisted series suggestions checked against real series, weekly digest, hosting and licence review
 
@@ -145,3 +146,4 @@ Educational project. Nothing here is financial, mortgage or real estate advice.
 | 2026-10-14 | Review pass 1 (self-review of M1 and M2). Fixed: staleness now computed at view time, district table can no longer mix months, chart holds the previous render while loading, export has `--no-trreb` and the UI handles it. Read the StatCan, BoC and CMHC terms: CMHC is personal use only, BoC FX is LSEG-sourced. Added the review loop to AGENTS.md. |
 | 2026-10-14 | Verified mortgage and tax rules from official pages and found a conflict on the insured price cap ($1.5M per Finance Canada, $1M still on an FCAC page). Built the Affordability tab. Review of that step: caught a wrong hand-calculated tax example in the docs ($16,475 should be $20,475), hid the closing cost table when a purchase is blocked, added the entered price to the grid. |
 | 2026-10-14 | Independent review (advisor) of M1, M2 and the calculator. Finding: mortgage and licence facts had only passed through a page-summarising tool. Re-checked every constant against raw page text. All matched, the FCAC $1M versus $1.5M conflict is real, the Ontario page's own closed-form formulas match our tax numbers. Rule added to AGENTS.md: verify numbers the code depends on in raw HTML. |
+| 2026-10-14 | Built the causal map (M3). Review of it caught: vertical connections cutting through nodes (rerouted as side curves), oversized arrowheads (SVG marker units), labels touching node borders, faint dimming in dark mode, and proper names lowercased in the edge sentence. Doc counts were first written from memory and were wrong, now taken from the export. |

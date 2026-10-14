@@ -84,8 +84,41 @@ export type HpiRow = {
   yoy_pct: number | null;
 };
 
+export type EdgeEvidence = {
+  status: "consistent" | "weak" | "opposite" | "insufficient" | "no_series";
+  best_lag_months?: number;
+  best_corr?: number;
+  corr_at_zero?: number | null;
+  pairs?: number;
+  overlap_months?: number;
+};
+
+export type GraphNode = {
+  id: string;
+  label: string;
+  col: number;
+  row: number;
+  series: string | null;
+  trreb: { kind: "market" | "hpi"; area: string; home_type: string; field: string | null } | null;
+};
+
+export type GraphEdge = {
+  from: string;
+  to: string;
+  sign: "+" | "-";
+  lag: string;
+  max_lag_months: number;
+  confidence: "established" | "plausible" | "debated";
+  review: "draft" | "reviewed";
+  rationale: string;
+  evidence: EdgeEvidence;
+};
+
+export type GraphData = { columns: string[]; nodes: GraphNode[]; edges: GraphEdge[] };
+
 export type AppData = {
   meta: Meta;
+  graph: GraphData;
   buyer: Buyer;
   catalogue: SeriesSummary[];
   market: MarketRow[];

@@ -2,7 +2,10 @@ import json
 from datetime import date
 
 from ingest import db, export
+from ingest.graph import Graph
 from ingest.models import Observation, SeriesDef
+
+NO_GRAPH = Graph(columns=[], nodes=[], edges=[])
 
 
 def _series(sid: str, unit: str = "percent", freq: str = "monthly") -> SeriesDef:
@@ -57,7 +60,7 @@ def test_export_writes_files_and_summaries(tmp_path, monkeypatch):
     index = _series("a.cpi", unit="index (2002=100)")
     _load(conn, "a.rate", [(date(2025, 6, 1), 3.0), (date(2026, 6, 1), 2.0)])
     _load(conn, "a.cpi", [(date(2025, 6, 1), 100.0), (date(2026, 6, 1), 103.0)])
-    meta = export.export(conn, [level, index], tmp_path, today=date(2026, 7, 1))
+    meta = export.export(conn, [level, index], tmp_path, today=date(2026, 7, 1), graph=NO_GRAPH)
     assert meta["series"] == 2
 
     cat = {c["id"]: c for c in json.loads((tmp_path / "catalogue.json").read_text())}
@@ -78,7 +81,9 @@ def test_export_writes_files_and_summaries(tmp_path, monkeypatch):
 
 def test_series_without_data_is_skipped(tmp_path):
     conn = db.connect(":memory:")
-    meta = export.export(conn, [_series("a.empty")], tmp_path, today=date(2026, 7, 1))
+    meta = export.export(
+        conn, [_series("a.empty")], tmp_path, today=date(2026, 7, 1), graph=NO_GRAPH
+    )
     assert meta["series"] == 0
 
 
@@ -90,9 +95,9 @@ def test_no_trreb_writes_an_empty_payload(tmp_path):
         conn,
         [DistrictRow(date(2026, 9, 1), "Toronto E01", "detached", {"sales": 13.0})],
     )
-    export.export(conn, [], tmp_path, today=date(2026, 10, 1), include_trreb=False)
+    export.export(conn, [], tmp_path, today=date(2026, 10, 1), include_trreb=False, graph=NO_GRAPH)
     payload = json.loads((tmp_path / "trreb.json").read_text())
     assert payload["market"] == [] and payload["hpi"] == []
     # and the default still exports it
-    export.export(conn, [], tmp_path, today=date(2026, 10, 1))
+    export.export(conn, [], tmp_path, today=date(2026, 10, 1), graph=NO_GRAPH)
     assert len(json.loads((tmp_path / "trreb.json").read_text())["market"]) == 1

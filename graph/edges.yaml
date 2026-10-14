@@ -1,0 +1,173 @@
+# Causal map edges. Every edge is a claim, not a fact. Written from general economic reasoning on
+# 2026-10-14 and NOT yet reviewed by the owner, so every edge is review: draft.
+# sign: "+" means the target moves the same way as the source, "-" the opposite way.
+# confidence: established (standard mechanism), plausible (mixed evidence), debated (contested).
+edges:
+  - from: fed_policy
+    to: ust_10y
+    sign: "+"
+    lag: immediate to months
+    max_lag_months: 3
+    confidence: plausible
+    review: draft
+    rationale: Expected Fed policy feeds the Treasury yield curve, but long yields also reflect term premium and growth expectations.
+
+  - from: ust_10y
+    to: gov_5y_yield
+    sign: "+"
+    lag: days
+    max_lag_months: 1
+    confidence: established
+    review: draft
+    rationale: Global bond markets are linked, so Canadian yields move with US yields.
+
+  - from: boc_policy_rate
+    to: prime_rate
+    sign: "+"
+    lag: immediate
+    max_lag_months: 1
+    confidence: established
+    review: draft
+    rationale: Banks set prime at a roughly fixed gap above the policy rate.
+
+  - from: prime_rate
+    to: mortgage_variable_rate
+    sign: "+"
+    lag: immediate
+    max_lag_months: 1
+    confidence: established
+    review: draft
+    rationale: Variable mortgage rates are quoted as prime plus or minus a spread.
+
+  - from: boc_policy_rate
+    to: gov_5y_yield
+    sign: "+"
+    lag: days to months
+    max_lag_months: 6
+    confidence: plausible
+    review: draft
+    rationale: The expected path of policy feeds the 5-year yield, but markets move ahead of decisions so the link is loose.
+
+  - from: gov_5y_yield
+    to: mortgage_fixed_rate
+    sign: "+"
+    lag: days to weeks
+    max_lag_months: 2
+    confidence: established
+    review: draft
+    rationale: Lenders fund fixed mortgages with bond-market money, so fixed rates follow the 5-year yield plus a margin.
+
+  - from: mortgage_fixed_rate
+    to: buyer_payment_capacity
+    sign: "-"
+    lag: immediate
+    confidence: established
+    review: draft
+    rationale: A higher rate raises the payment on a given loan, which cuts how much a buyer can borrow.
+
+  - from: mortgage_variable_rate
+    to: buyer_payment_capacity
+    sign: "-"
+    lag: immediate
+    confidence: established
+    review: draft
+    rationale: Same mechanism as fixed rates, for buyers choosing a variable rate.
+
+  - from: unemployment
+    to: buyer_payment_capacity
+    sign: "-"
+    lag: months
+    max_lag_months: 6
+    confidence: plausible
+    review: draft
+    rationale: Rising local unemployment weakens income security and confidence, so fewer households qualify or want to buy.
+
+  - from: buyer_payment_capacity
+    to: sales
+    sign: "+"
+    lag: 1 to 3 months
+    max_lag_months: 3
+    confidence: established
+    review: draft
+    rationale: Less purchasing power means fewer transactions.
+
+  - from: sales
+    to: inventory_months
+    sign: "-"
+    lag: 1 to 3 months
+    max_lag_months: 3
+    confidence: established
+    review: draft
+    rationale: Faster sales shrink the stock of unsold homes relative to the sales pace.
+
+  - from: new_listings
+    to: inventory_months
+    sign: "+"
+    lag: immediate
+    max_lag_months: 1
+    confidence: established
+    review: draft
+    rationale: More homes entering the market raises the supply relative to sales.
+
+  - from: starts
+    to: inventory_months
+    sign: "+"
+    lag: 18 to 36 months
+    max_lag_months: 36
+    confidence: plausible
+    review: draft
+    rationale: New construction reaches the market after a long build time. Most Toronto starts are apartments, so the link to freehold inventory is weak.
+
+  - from: inventory_months
+    to: prices
+    sign: "-"
+    lag: 3 to 12 months
+    max_lag_months: 12
+    confidence: established
+    review: draft
+    rationale: More supply relative to demand shifts bargaining power to buyers and slows price growth.
+
+  - from: prices
+    to: new_listings
+    sign: "+"
+    lag: months
+    max_lag_months: 6
+    confidence: plausible
+    review: draft
+    rationale: Rising prices can pull owners to list, though falling prices can also trigger forced sales.
+
+  - from: population_growth
+    to: rents
+    sign: "+"
+    lag: 6 to 18 months
+    max_lag_months: 18
+    confidence: plausible
+    review: draft
+    rationale: More households chase a rental stock that adds supply slowly, especially where supply is tight.
+
+  - from: rents
+    to: sales
+    sign: "+"
+    lag: months
+    max_lag_months: 12
+    confidence: debated
+    review: draft
+    rationale: Higher rents can push renters toward buying, or price them out of buying. The direction depends on conditions.
+
+  - from: cpi_core
+    to: boc_policy_rate
+    sign: "+"
+    lag: months
+    max_lag_months: 12
+    confidence: established
+    review: draft
+    rationale: The Bank targets inflation, so persistent core inflation pushes policy rates up.
+
+  - from: oil_price
+    to: usdcad
+    sign: "-"
+    lag: immediate
+    max_lag_months: 1
+    confidence: plausible
+    review: draft
+    rationale: Canada exports oil, so higher oil tends to strengthen the Canadian dollar (lower USD/CAD). The relationship varies over time.

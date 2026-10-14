@@ -44,7 +44,7 @@ flashlight/
 | Storage | DuckDB (single local file) | Good for time series and percentile queries |
 | Front end | React + TypeScript + Vite | Static build |
 | Charts | Apache ECharts | Annotations, mark lines, heatmaps, maps |
-| Causal map | React Flow | Custom nodes show live state and sparkline |
+| Causal map | Custom accessible SVG | About 19 nodes with a hand-set layered layout. Chosen over a graph library for keyboard access, theme control and no new dependency |
 | State | Keep simple (React state / context). Add a store only if needed. | |
 | Tests | pytest (Python), Vitest (front end) | |
 

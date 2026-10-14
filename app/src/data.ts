@@ -1,6 +1,7 @@
 import type {
   AppData,
   Buyer,
+  GraphData,
   HpiRow,
   MarketRow,
   Meta,
@@ -27,13 +28,14 @@ export function parseTrreb(raw: TrrebRaw): { market: MarketRow[]; hpi: HpiRow[] 
 }
 
 export async function loadAll(): Promise<AppData> {
-  const [meta, buyer, catalogue, trreb] = await Promise.all([
+  const [meta, buyer, catalogue, trreb, graph] = await Promise.all([
     getJson<Meta>("meta.json"),
     getJson<Buyer>("buyer.json"),
     getJson<SeriesSummary[]>("catalogue.json"),
     getJson<TrrebRaw>("trreb.json"),
+    getJson<GraphData>("graph.json"),
   ]);
-  return { meta, buyer, catalogue, ...parseTrreb(trreb) };
+  return { meta, buyer, catalogue, graph, ...parseTrreb(trreb) };
 }
 
 const seriesCache = new Map<string, Promise<SeriesData>>();

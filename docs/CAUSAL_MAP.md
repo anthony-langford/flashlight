@@ -1,82 +1,49 @@
 # Causal map
 
-The causal map is the backbone of the app and the main way it teaches. This doc defines the design. Seed content below is a first draft from general economic reasoning. It has NOT been reviewed by the owner or tested against data.
+The causal map is the backbone of the app and the main way it teaches. **The source of truth is `graph/nodes.yaml` and `graph/edges.yaml`.** This doc explains the design and how to review it. It does not duplicate the edges.
 
 ## Principles
 
-- Edges are claims, not facts. Each has a sign, a typical lag, a strength, a one or two sentence rationale, and a confidence tag.
+- Edges are claims, not facts. Each has a sign, a typical lag, a confidence tag and a rationale.
 - Confidence tags: `established` (standard mechanism, widely documented), `plausible` (reasonable, mixed evidence), `debated` (contested or regime-dependent).
-- An LLM may draft edges, but the owner reviews them. Unreviewed edges are shown as `draft` and visibly styled differently.
-- Where data allows, an edge links to a lead/lag chart of its two series so the claim can be inspected.
+- Every edge is `review: draft` until the owner reviews it. Drafts are drawn dashed. When you review an edge, set `review: reviewed`, which draws it solid.
+- A data check sits beside each claim, but it never replaces the rationale and it is not proof of causation.
 
-## Schema
+## Files
 
-`graph/nodes.yaml`
+`graph/nodes.yaml` lists the display `columns` and the nodes. A node places itself with `col` and `row`, and shows live data from at most one source: a catalogue `series`, or a `trreb` reference (a market column or an HPI benchmark, one month of history so far). A node with neither is a concept, such as buyer payment capacity.
 
-```yaml
-- id: gov_5y_yield
-  label: GoC 5-year yield
-  series: boc.gov_5y_yield     # optional, concept nodes have none
-  layer: rates_credit
-  kind: indicator              # indicator | concept | policy | shock
-```
+`graph/edges.yaml` lists the edges: `from`, `to`, `sign` (`"+"` same direction, `"-"` opposite), `lag` (text shown to the reader), `max_lag_months` (how far the data check searches), `confidence`, `review` and `rationale`.
 
-`graph/edges.yaml`
+`ingest/graph.py` validates both files with pydantic: unique node ids, edge endpoints exist, no duplicate or self edges, every node column is declared, and every `series` exists in the catalogue. `tests/test_graph.py` checks the real graph and the data check.
 
-```yaml
-- from: gov_5y_yield
-  to: mortgage_fixed_rate
-  sign: "+"
-  lag: "days to weeks"
-  strength: strong
-  confidence: established
-  review: draft                # draft | reviewed
-  rationale: >
-    Lenders fund fixed mortgages with bond-market money, so fixed rates track
-    the 5-year yield plus a margin.
-  evidence: null               # optional pointer to a lead/lag chart config
-```
+## The data check
 
-## Front-end behaviour
+For each edge where both ends have a data series, the export computes, on **monthly changes** (a difference for rates, a percent change for levels, so that two trending levels do not produce a false link):
 
-- Nodes show the latest value, the percentile vs history and a sparkline. Colour encodes recent state (rising, falling, extreme).
-- Click a node: live chart, explainer, inbound and outbound edges.
-- Click an edge: rationale, lag, confidence, and the lead/lag chart if available.
-- Shock mode: choose a node and a direction (for example, policy rate down 50 bps). Highlight downstream paths, ordered by typical lag, with the confidence of each hop. This is illustrative, not a forecast, and the UI must say so.
-- Filters: layer, confidence level, reviewed only.
+1. Resample each series to months, keeping the last reading in each month.
+2. Correlate the source's change in month t with the target's change in month t + lag, for lags 0 to `max_lag_months` (the source leads).
+3. Keep the lag with the strongest correlation, and label the edge:
+   - `consistent`: |r| of at least 0.15 and the sign matches the claim.
+   - `weak`: |r| below 0.15.
+   - `opposite`: |r| of at least 0.15 but the sign is the other way.
+   - `insufficient`: fewer than 60 overlapping months (annual series always land here).
+   - `no_series`: one end is a TRREB node or a concept, so there is nothing long enough to check.
 
-## Seed nodes (draft, about 18)
+Searching several lags and keeping the best flatters the result a little, so read "consistent" as "does not contradict", not as strong support. As of 2026-10-14 (19 edges): 8 are consistent, 1 is insufficient (population is annual) and 10 have no series, mostly the Toronto housing-market chain because TRREB history starts in September 2026. That chain will become checkable as months accumulate.
 
-Policy and rates: `fed_policy`, `ust_10y`, `boc_policy_rate`, `prime_rate`, `gov_5y_yield`, `mortgage_fixed_rate`, `mortgage_variable_rate`
-Macro: `us_economy`, `usdcad`, `oil_price`, `cpi_core`, `toronto_employment`, `wages`
-Housing demand: `population_growth`, `buyer_payment_capacity`, `sales`
-Housing supply and prices: `new_listings`, `inventory_months`, `prices`, `rents`, `starts`
+## How the app uses it
 
-## Seed edges (draft)
+- Nodes show the latest value, the direction over the past year, and where the reading sits in its own history (P90 means 90% of past readings were at or below it). Colour is never the only signal: edges carry a + or − badge, line width shows confidence and dashes show draft.
+- Click a node for its chart, explainer and its inbound and outbound connections. Click an edge for the rationale, timing, confidence and data check. Every node and edge is keyboard focusable, and a table lists all connections.
+- **Trace a shock** picks a node and a direction, follows every simple path out of it (no node twice, at most six steps), and multiplies the signs along each path. A node reached by paths of opposite sign is labelled mixed. It is illustrative, not a forecast: it ignores size, overlapping timing and everything outside the map, and the UI says so.
+- Views can be linked: `#/map?node=gov_5y_yield`, `#/map?edge=5`, `#/map?shock=boc_policy_rate&dir=up`.
 
-| From | To | Sign | Lag | Confidence | Rationale |
-|---|---|---|---|---|---|
-| fed_policy | ust_10y | + | immediate to months | plausible | Policy expectations feed the yield curve, but long yields also reflect term premium. |
-| ust_10y | gov_5y_yield | + | days | established | Global bond markets are linked. Canadian yields co-move with US yields. |
-| boc_policy_rate | prime_rate | + | immediate | established | Banks set prime at a fixed spread above the policy rate. |
-| boc_policy_rate | mortgage_variable_rate | + | immediate | established | Variable rates are priced off prime. |
-| boc_policy_rate | gov_5y_yield | + | days to months | plausible | Expected path of policy feeds the 5-year yield, but the market moves ahead of decisions. |
-| gov_5y_yield | mortgage_fixed_rate | + | days to weeks | established | Fixed mortgages are funded off bond-market money. |
-| mortgage_fixed_rate | buyer_payment_capacity | - | immediate | established | Higher rates raise the payment on a given loan, cutting borrowing power. |
-| buyer_payment_capacity | sales | + | 1-3 months | established | Less purchasing power means fewer transactions. |
-| sales | inventory_months | - | 1-3 months | established | Slower sales leave more unsold stock relative to sales pace. |
-| new_listings | inventory_months | + | immediate | established | More supply entering the market. |
-| inventory_months | prices | - | 3-12 months | established | More supply relative to demand shifts leverage to buyers. |
-| prices | new_listings | + | months | plausible | Rising prices can pull owners to list, but price falls can also trigger forced sales. |
-| population_growth | rents | + | 6-18 months | plausible | More households chase rental stock, especially where supply is tight. |
-| rents | sales | + | months | debated | Higher rents can push renters to buy, or price them out. Direction is regime-dependent. |
-| toronto_employment | buyer_payment_capacity | + | months | plausible | Job and wage growth support income and confidence. |
-| cpi_core | boc_policy_rate | + | months | established | The Bank targets inflation, so persistent core inflation raises policy rates. |
-| oil_price | usdcad | - | immediate | plausible | Canada is a commodity exporter, so oil strength tends to lift the Canadian dollar. Relationship varies over time. |
-| starts | inventory_months | + | 18-36 months | plausible | Completions add supply after a long construction lag, especially for condos. |
+## Reviewing the edges (owner task)
 
-All rows are `review: draft` until the owner marks them reviewed.
+For each edge in `graph/edges.yaml`, read the rationale and confidence. Change anything you disagree with, then set `review: reviewed`. Pay most attention to the `debated` edge (`rents` to `sales`) and to the `plausible` ones. Weak points I already know about:
 
-## Evidence plan
-
-For each edge with two data series, compute lagged correlation (and rolling correlation to check stability) on first differences or percentage changes, not levels. Present results as "consistent with" or "not supported", never as proof. Record the method and date in the edge's `evidence` field.
+- `starts` to `inventory_months` uses CMHC starts for all unit types, mostly apartments, so it says little about freehold supply.
+- `unemployment` to `buyer_payment_capacity` is a concept link with no data check.
+- `mortgage_fixed_rate` uses the posted 5-year rate as a proxy, which buyers rarely pay.
+- The map has no edge for immigration policy or for the stress test, both of which plausibly matter. Add them if you agree.

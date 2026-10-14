@@ -1,0 +1,38 @@
+# Causal map nodes. `col` and `row` place the node on the canvas (left to right, top to bottom).
+# A node shows live data from at most one source:
+#   series: a catalogue series id
+#   trreb:  a TRREB table row (kind market or hpi), only one month of history so far
+# Concept nodes have neither.
+columns:
+  - Global
+  - Canada policy and markets
+  - Borrowing costs
+  - Buyers
+  - Market activity
+  - Outcomes
+
+nodes:
+  - {id: fed_policy, label: US Fed policy rate, col: 0, row: 0, series: fred.fed_funds}
+  - {id: ust_10y, label: US 10-year yield, col: 0, row: 1, series: fred.ust_10y}
+  - {id: oil_price, label: Oil price (WTI), col: 0, row: 3, series: fred.wti_oil}
+
+  - {id: boc_policy_rate, label: Bank of Canada policy rate, col: 1, row: 1, series: boc.policy_rate}
+  - {id: gov_5y_yield, label: GoC 5-year yield, col: 1, row: 2, series: boc.gov_5y_yield}
+  - {id: cpi_core, label: Core inflation (CPI-trim), col: 1, row: 0, series: boc.cpi_trim}
+  - {id: usdcad, label: USD/CAD, col: 1, row: 3, series: boc.usdcad}
+
+  - {id: prime_rate, label: Prime rate, col: 2, row: 0, series: boc.prime_rate}
+  - {id: mortgage_variable_rate, label: Variable mortgage rate, col: 2, row: 1, series: boc.mortgage_5y_variable_est}
+  - {id: mortgage_fixed_rate, label: Fixed mortgage rate (posted 5-yr), col: 2, row: 2, series: boc.mortgage_5y_posted}
+
+  - {id: unemployment, label: Toronto unemployment, col: 3, row: 0, series: statcan.toronto.unemployment_rate}
+  - {id: buyer_payment_capacity, label: Buyer payment capacity, col: 3, row: 1.5}
+  - {id: population_growth, label: Toronto population, col: 3, row: 4, series: statcan.toronto.population}
+
+  - {id: sales, label: Home sales (Toronto), col: 4, row: 1, trreb: {kind: market, area: City of Toronto, home_type: all, field: sales}}
+  - {id: new_listings, label: New listings (Toronto), col: 4, row: 2, trreb: {kind: market, area: City of Toronto, home_type: all, field: new_listings}}
+  - {id: starts, label: Housing starts, col: 4, row: 3, series: statcan.toronto.housing_starts_total}
+
+  - {id: prices, label: Home prices (HPI benchmark), col: 5, row: 0, trreb: {kind: hpi, area: City of Toronto, home_type: composite}}
+  - {id: inventory_months, label: Months of inventory, col: 5, row: 1.5, trreb: {kind: market, area: City of Toronto, home_type: all, field: months_inventory}}
+  - {id: rents, label: Rents (Toronto CPI), col: 5, row: 4, series: statcan.toronto.cpi_rented_accommodation}

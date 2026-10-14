@@ -19,6 +19,7 @@ import duckdb
 import yaml
 
 from ingest import db
+from ingest.graph import Graph, graph_payload, load_graph
 from ingest.models import SeriesDef
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -91,6 +92,7 @@ def export(
     out_dir: Path = DEFAULT_OUT,
     today: date | None = None,
     include_trreb: bool = True,
+    graph: Graph | None = None,
 ) -> dict:
     today = today or date.today()
     (out_dir / "series").mkdir(parents=True, exist_ok=True)
@@ -119,11 +121,17 @@ def export(
     trreb = _trreb_payload(conn) if include_trreb else _empty_trreb()
     (out_dir / "trreb.json").write_text(json.dumps(trreb, separators=(",", ":")))
 
+    # By default the repository graph, validated against the catalogue. Tests inject their own.
+    graph = graph if graph is not None else load_graph(catalogue=catalogue)
+    graph_json = graph_payload(graph, conn, catalogue)
+    (out_dir / "graph.json").write_text(json.dumps(graph_json, indent=1))
+
     meta = {
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "series": len(summaries),
         "trreb_rows": len(trreb["market"]),
         "hpi_rows": len(trreb["hpi"]),
+        "graph_edges": len(graph_json["edges"]),
     }
     (out_dir / "meta.json").write_text(json.dumps(meta, indent=1))
     return meta

@@ -499,3 +499,165 @@ input[type="checkbox"]:focus-visible {
 .row-yours td {
   background: var(--wash);
 }
+
+/* Causal map */
+.map-card {
+  padding: 8px;
+  overflow-x: auto;
+}
+.map-card svg {
+  min-width: 760px;
+  display: block;
+}
+.map-col {
+  fill: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.map-edge {
+  cursor: pointer;
+}
+.map-edge .hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 16;
+}
+.map-edge:focus-visible,
+.map-node:focus-visible {
+  outline: none;
+}
+.map-edge:focus-visible path:not(.hit),
+.map-node:focus-visible .node-box {
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+.badge {
+  fill: var(--surface);
+  stroke-width: 1.5;
+}
+.badge-text {
+  fill: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  pointer-events: none;
+}
+.map-node {
+  cursor: pointer;
+}
+.node-box {
+  fill: var(--surface);
+  stroke: var(--baseline);
+  stroke-width: 1;
+}
+.node-box.selected {
+  stroke: var(--series1);
+  stroke-width: 2.5;
+}
+.node-label {
+  fill: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+}
+.node-value {
+  fill: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  pointer-events: none;
+}
+.node-sub {
+  fill: var(--muted);
+  font-size: 11px;
+  pointer-events: none;
+}
+.effect-badge {
+  fill: var(--ink);
+}
+.effect-glyph {
+  fill: var(--surface);
+  font-size: 11px;
+  pointer-events: none;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 10px;
+}
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.swatch {
+  display: inline-block;
+  width: 26px;
+  height: 0;
+  border-top: 2px solid;
+}
+.swatch.pos {
+  border-color: var(--series1);
+}
+.swatch.neg {
+  border-color: var(--series2);
+}
+.swatch.thick {
+  border-top-width: 4px;
+  border-color: var(--ink2);
+}
+.swatch.dashed {
+  border-top-style: dashed;
+  border-color: var(--ink2);
+}
+.shock-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.shock-list {
+  padding-left: 20px;
+  margin: 8px 0 0;
+  display: grid;
+  gap: 8px;
+}
+.linklike {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--ink);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.linklike:hover {
+  background: var(--wash);
+}
+.detail-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px 18px 14px;
+  margin: 12px 0;
+}
+.detail-panel h3 {
+  font-size: 17px;
+}
+.detail-panel h4 {
+  font-size: 13px;
+  margin: 10px 0 2px;
+  color: var(--ink2);
+}
+.edge-lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+.edge-lists ul,
+.facts-list {
+  margin: 0;
+  padding-left: 18px;
+}
