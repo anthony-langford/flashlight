@@ -15,12 +15,13 @@ Last updated: 2026-10-14. Phase: M1 (data foundation) in progress. No applicatio
 - [x] Repo, license, gitignore, design docs
 - [x] Toolchain: `uv` 0.13 and managed Python 3.12 installed (via Homebrew), Node 26 available
 - [x] Python project scaffolded (`pyproject.toml`, `ingest/` package, pytest, ruff)
-- [ ] Series catalogue (YAML) for the v1 series: 38 series done (BoC 11 incl. USD/CAD, FRED 8, StatCan Toronto 19), all with drafted explainers awaiting owner review. Manual series (TRREB, CMHC rent) still to do
+- [ ] Series catalogue (YAML) for the v1 series: 38 series done (BoC 11 incl. USD/CAD, FRED 8, StatCan Toronto 19), all with drafted explainers awaiting owner review. TRREB lives in its own table (`trreb_monthly`), not the catalogue. CMHC rent still to do
 - [x] Bank of Canada Valet client (tests, fixture). `uv run python -m ingest sync --source boc_valet` loads all 10 BoC series (verified 2026-10-14, history from 1975 to 2001 depending on series)
 - [x] DuckDB schema, idempotent upserts, 45-day revision lookback, per-series error isolation
 - [x] FRED client (key via `.env`, redacted from logs, errors and the DB; tests). 8 FRED series plus BoC USD/CAD synced live 2026-10-14
 - [x] StatCan client (vector-based, verified live; matches results by vector id because the API reorders batches). Retry with backoff for transient errors
-- [ ] Manual-entry templates (TRREB, CMHC rent)
+- [x] TRREB Market Watch parser: monthly district tables by home type (sales, prices, listings, SP/LP, days on market). Verified on Sept 2026 PDF (760 rows). `uv run python -m ingest trreb --from 2026-09`. Older PDF layouts unsupported, HPI benchmark pages not parsed yet
+- [ ] CMHC rent workbook (annual Excel, manual download, not yet inspected)
 - [ ] Export step to JSON
 - [ ] React app scaffolded
 - [ ] First views, then causal map
@@ -33,12 +34,13 @@ Stated by the owner on 2026-10-14.
 - **Property:** freehold, semi-detached or detached.
 - **Budget:** $1.10M to $1.35M. Used for affordability defaults.
 - **Target areas:** east end and west end, with good school districts in mind. Named examples: Riverdale and Monarch Park (east end), Sunnylea (west end, Etobicoke).
-- TRREB district codes for these areas have not been confirmed yet. They must be read from an actual Market Watch PDF, not assumed.
+- TRREB districts: Riverdale is E01. Monarch Park and Sunnylea are not TRREB communities and their districts are unconfirmed (see Open questions).
 
 ## Next steps
 
-1. Manual-entry templates: TRREB monthly by district and property type, CMHC rent.
-2. Export to JSON (with derived series such as year-over-year change and percentiles), then scaffold the React app.
+1. TRREB: parse the MLS HPI benchmark pages (best price series, needs word positions), and find a way to recover history before Sept 2026.
+2. CMHC rent workbook: download and inspect, add Toronto vacancy and average rent.
+3. Export to JSON (with derived series such as year-over-year change and percentiles), then scaffold the React app.
 
 ## Milestones
 
@@ -56,8 +58,8 @@ Stated by the owner on 2026-10-14.
 
 ## Open questions
 
-- Exact TRREB districts for Riverdale, Monarch Park and Sunnylea, and which other east and west end districts to compare. Read from a Market Watch PDF.
-- TRREB capture: manual monthly entry or a PDF parser? Decide after seeing a PDF.
+- Neighbourhood to TRREB district mapping. Riverdale is E01 (2019 community report). Monarch Park (candidates E01, E02, E03) and Sunnylea (candidates W07, W08) are unconfirmed. See docs/DATA_SOURCES.md. Needs school catchment boundaries and current TRREB maps.
+- How to recover TRREB history before Sept 2026 (older PDF layout has duplicated text layers).
 - Which school-quality source, if any, is acceptable to use.
 
 ## Must verify before building the mortgage calculator
@@ -96,7 +98,7 @@ If you are picking this project up fresh (new chat, fork or agent), read [AGENTS
 
 ## Development
 
-Requires `uv` and Node. Copy `.env.example` to `.env` and set `FRED_API_KEY`.
+Requires `uv`, Node and poppler (`brew install poppler`, for TRREB PDFs). Copy `.env.example` to `.env` and set `FRED_API_KEY`.
 
 ```
 uv sync              # install Python deps (uses Python 3.12)
@@ -104,6 +106,7 @@ uv run pytest        # tests
 uv run ruff check .  # lint
 uv run python -m ingest sync [--source boc_valet] [--series ID] [--full]
                      # fetch series into data/flashlight.duckdb
+uv run python -m ingest trreb --from 2026-09   # download and parse TRREB PDFs
 ```
 
 More commands are added here as the code lands.
@@ -128,4 +131,4 @@ Educational project. Nothing here is financial, mortgage or real estate advice.
 
 | Date | Summary |
 |---|---|
-| 2026-10-14 | Explored idea and market. Chose scope (Toronto housing, no China). Verified BoC, StatCan and FRED series and Toronto coverage. CMHC and TRREB are file-based only. Created repo and docs, pushed. Recorded buyer profile. Installed uv and Python 3.12. Made README the status source of truth. |
+| 2026-10-14 | Explored idea and market. Chose scope (Toronto housing, no China). Verified BoC, StatCan and FRED series and Toronto coverage. CMHC and TRREB are file-based only. Created repo and docs, pushed. Recorded buyer profile. Installed uv and Python 3.12. Made README the status source of truth. Built BoC, FRED and StatCan clients (38 series) and a TRREB PDF parser (Sept 2026 layout). Installed poppler. |

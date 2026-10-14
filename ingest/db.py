@@ -27,6 +27,23 @@ CREATE TABLE IF NOT EXISTS observation (
     value DOUBLE NOT NULL,
     PRIMARY KEY (series_id, obs_date)
 );
+CREATE TABLE IF NOT EXISTS trreb_monthly (
+    period DATE NOT NULL,
+    area VARCHAR NOT NULL,
+    home_type VARCHAR NOT NULL,
+    sales INTEGER,
+    dollar_volume DOUBLE,
+    avg_price DOUBLE,
+    median_price DOUBLE,
+    new_listings INTEGER,
+    snlr_trend DOUBLE,
+    active_listings INTEGER,
+    months_inventory DOUBLE,
+    sp_lp DOUBLE,
+    ldom DOUBLE,
+    pdom DOUBLE,
+    PRIMARY KEY (period, area, home_type)
+);
 CREATE TABLE IF NOT EXISTS fetch_log (
     series_id VARCHAR NOT NULL,
     fetched_at TIMESTAMP NOT NULL,
@@ -86,4 +103,21 @@ def log_fetch(
     conn.execute(
         "INSERT INTO fetch_log VALUES (?, ?, ?, ?, ?)",
         [series_id, datetime.now(UTC).replace(tzinfo=None), rows, status, note],
+    )
+
+
+TRREB_FIELDS = [
+    "sales", "dollar_volume", "avg_price", "median_price", "new_listings", "snlr_trend",
+    "active_listings", "months_inventory", "sp_lp", "ldom", "pdom",
+]  # fmt: skip
+
+
+def upsert_trreb(conn: duckdb.DuckDBPyConnection, rows: list) -> None:
+    """Upsert parsed TRREB district rows (ingest.sources.trreb.DistrictRow)."""
+    if not rows:
+        return
+    placeholders = ", ".join("?" * (3 + len(TRREB_FIELDS)))
+    conn.executemany(
+        f"INSERT OR REPLACE INTO trreb_monthly VALUES ({placeholders})",
+        [[r.period, r.area, r.home_type, *(r.values.get(f) for f in TRREB_FIELDS)] for r in rows],
     )

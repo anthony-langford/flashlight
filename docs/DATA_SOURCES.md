@@ -10,7 +10,7 @@ Everything marked VERIFIED was fetched on 2026-10-14. "Latest" values are from t
 | Statistics Canada | WDS API, full-table CSV | none | JSON / CSV zip | VERIFIED (metadata and 2 CSVs) |
 | FRED | REST API | free API key | JSON / CSV | VERIFIED (IDs via public CSV graph endpoint) |
 | CMHC | Excel downloads | none | xlsx | PARTIAL (page checked, file not downloaded) |
-| TRREB | PDF reports | none | PDF | PARTIAL (no machine-readable data found) |
+| TRREB | PDF reports, parsed locally | none | PDF | VERIFIED for Sept 2026 layout onward. Older layout unsupported |
 
 ## Bank of Canada Valet
 
@@ -116,10 +116,26 @@ Terms (https://fred.stlouisfed.org/docs/api/terms_of_use.html, read 2026-10-14):
 
 ## TRREB (Toronto Regional Real Estate Board)
 
-- Market Watch is published monthly as PDF. Page: https://trreb.ca/index.php/market-news/market-watch. Historic annual statistics PDF (1979 onward): https://public.trreb.ca/wp-content/files/market-stats/market-watch/historic.pdf.
-- Confirmed monthly measures: home sales, new listings, MLS Home Price Index composite benchmark, average selling price. Inventory and days on market not confirmed on the page, may be in the PDFs.
-- No CSV or API found. Footer: "All information on this site is copyright Toronto Regional Real Estate Board. All rights reserved."
-- Plan for personal use: a manual CSV (`data/manual/trreb_monthly.csv`, template tracked) or a PDF parser. Do not redistribute. For hosting, get permission (contact details are in the Market Watch PDFs) or link out.
+Personal use only. All TRREB content is copyrighted ("All rights reserved"). PDFs are cached in `data/trreb/` and parsed rows live in the gitignored DuckDB file. Do not redistribute. For hosting, get permission (contact details are in the Market Watch PDFs) or link out.
+
+- Market Watch is published monthly as a PDF, usually in the first week of the following month. URL pattern (checked 2026-10-14): `https://trreb.ca/wp-content/files/market-stats/market-watch/mwYYMM.pdf`, for example `mw2609.pdf`. Page: https://trreb.ca/index.php/market-news/market-watch. No CSV or API exists.
+- **Parsed (ingest/sources/trreb.py):** the monthly district tables, for each home type (all, detached, semi-detached, att/row/townhouse, condo townhouse, condo apartment, link, co-op, detached condo, co-ownership). One row per area or district (`Toronto E01`, `Toronto W08`, municipalities, regions). Columns: sales, dollar volume, average price, median price, new listings, active listings, average sale-to-list ratio (SP/LP), average days on market (LDOM). The "all home types" table also has SNLR trend, months of inventory and PDOM. Year-to-date tables are skipped. Command: `uv run python -m ingest trreb --from 2026-09`. Requires `pdftotext` (`brew install poppler`).
+- Verified 2026-10-14 on the September 2026 PDF: 760 rows (76 areas x 10 types). Spot checks against the PDF text matched (for example E01 detached: 13 sales, $1,506,231 average, 114% SP/LP).
+- **Layout change:** TRREB changed the report layout with the September 2026 issue. The older layout (checked on July and August 2026) has overlapping duplicate text layers, so plain text extraction gives scrambled columns. Those PDFs are NOT supported. History before September 2026 is therefore missing. Options: parse word coordinates with column matching, try another PDF library, or build history forward month by month.
+- **Not yet parsed:** MLS Home Price Index (HPI) benchmark pages (benchmark price and year-over-year change by district for composite, single family detached, single family attached, townhouse, apartment). `pdftotext -raw` gives clean rows, but districts with a missing home-type column are ambiguous, so column assignment needs word positions. HPI is the best price series (it adjusts for mix), so this is a priority. Semi-detached homes fall under "single family attached" in the HPI.
+- Historic annual statistics PDF (1979 onward, annual sales and average price): https://public.trreb.ca/wp-content/files/market-stats/market-watch/historic.pdf. Not parsed.
+
+### Target areas and TRREB districts
+
+TRREB districts are the finest geography in the monthly report. Neighbourhood-level (community) numbers appear only in separate quarterly community reports. The 2019 community reports (https://trreb.ca/wp-content/files/market-stats/community-reports/2019/Q1/Toronto/TorontoEastQ12019.pdf and `TorontoWestQ12019.pdf`) were the newest I could fetch. URLs for 2025 and 2026 reports returned 404, so the current location is unknown. Boundaries may have changed since 2019.
+
+| Area you named | TRREB district(s) | Evidence |
+|---|---|---|
+| Riverdale | E01 (communities North Riverdale, South Riverdale, Blake-Jones, Greenwood-Coxwell) | 2019 community report. Confident. |
+| Monarch Park | Not a TRREB community. Near Coxwell and Danforth, so the likely candidates are E01, E02 (The Beaches, East End-Danforth, Woodbine Corridor) and E03 (East York, Danforth, Playter Estates-Danforth, Woodbine-Lumsden) | Not verified. Needs the TDSB school catchment boundary compared with TRREB communities. |
+| Sunnylea | Not a TRREB community. Candidates: W07 (Stonegate-Queensway) or W08 (includes Kingsway South, Edenbridge-Humber Valley, Princess-Rosethorn, Islington-City Centre West) | Not verified. |
+
+Treat the district-to-neighbourhood mapping as a working assumption until checked against current TRREB maps and school catchments.
 
 ## Known gaps and open items
 
@@ -130,4 +146,5 @@ Terms (https://fred.stlouisfed.org/docs/api/terms_of_use.html, read 2026-10-14):
 5. **StatCan and BoC licence terms** have not been read.
 6. ~~WDS vector endpoints untested.~~ Done 2026-10-14, see above.
 7. **CMHC workbook** not downloaded or inspected.
-8. **TRREB** inventory / days-on-market availability and permission to reuse.
+8. **TRREB** history before Sept 2026 (old PDF layout), HPI benchmark parsing, current community report URL, and permission to reuse if hosting.
+9. **Neighbourhood to district mapping** for Monarch Park and Sunnylea (see above).
