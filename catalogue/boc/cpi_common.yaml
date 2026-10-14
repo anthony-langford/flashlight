@@ -3,7 +3,7 @@ title: CPI-common (core inflation)
 source: boc_valet
 source_id: CPI_COMMON
 frequency: monthly
-unit: percent (year over year)
+unit: percent
 geography: Canada
 layer: canada_macro
 explainer:

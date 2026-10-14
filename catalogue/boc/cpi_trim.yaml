@@ -3,7 +3,7 @@ title: CPI-trim (core inflation)
 source: boc_valet
 source_id: CPI_TRIM
 frequency: monthly
-unit: percent (year over year)
+unit: percent
 geography: Canada
 layer: canada_macro
 explainer:

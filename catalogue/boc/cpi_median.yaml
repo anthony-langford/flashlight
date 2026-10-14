@@ -3,7 +3,7 @@ title: CPI-median (core inflation)
 source: boc_valet
 source_id: CPI_MEDIAN
 frequency: monthly
-unit: percent (year over year)
+unit: percent
 geography: Canada
 layer: canada_macro
 explainer:

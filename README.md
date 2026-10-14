@@ -16,8 +16,8 @@ Last updated: 2026-10-14. Phase: M1 (data foundation) in progress. No applicatio
 - [x] Toolchain: `uv` 0.13 and managed Python 3.12 installed (via Homebrew), Node 26 available
 - [x] Python project scaffolded (`pyproject.toml`, `ingest/` package, pytest, ruff)
 - [ ] Series catalogue (YAML) for the v1 series: Bank of Canada done (10 series, explainers drafted, awaiting owner review). FRED, StatCan, manual still to do
-- [ ] Bank of Canada Valet client
-- [ ] DuckDB schema and loader
+- [x] Bank of Canada Valet client (tests, fixture). `uv run python -m ingest sync --source boc_valet` loads all 10 BoC series (verified 2026-10-14, history from 1975 to 2001 depending on series)
+- [x] DuckDB schema, idempotent upserts, 45-day revision lookback, per-series error isolation
 - [ ] FRED client
 - [ ] StatCan client (vector-based)
 - [ ] Manual-entry templates (TRREB, CMHC rent)
@@ -37,8 +37,7 @@ Stated by the owner on 2026-10-14.
 
 ## Next steps
 
-1. Bank of Canada Valet client with tests, then DuckDB loader and a `sync` command.
-2. FRED client, then StatCan client (take Toronto vector IDs from the full-table CSVs, then test the WDS vector endpoints).
+1. FRED client (key from `.env`, scrub `api_key` from any fixtures), then StatCan client (take Toronto vector IDs from the full-table CSVs, then test the WDS vector endpoints).
 3. Manual-entry templates: TRREB monthly by district and property type, CMHC rent.
 4. Export to JSON, then scaffold the React app.
 
@@ -104,6 +103,8 @@ Requires `uv` and Node. Copy `.env.example` to `.env` and set `FRED_API_KEY`.
 uv sync              # install Python deps (uses Python 3.12)
 uv run pytest        # tests
 uv run ruff check .  # lint
+uv run python -m ingest sync [--source boc_valet] [--series ID] [--full]
+                     # fetch series into data/flashlight.duckdb
 ```
 
 More commands are added here as the code lands.
