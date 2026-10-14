@@ -27,8 +27,8 @@ target_areas:
 
 # Human readable labels for TRREB districts that appear in the target areas.
 district_labels:
-  E01: Riverdale, Leslieville area
-  E02: The Beaches, East End-Danforth, Woodbine Corridor
-  E03: East York, Danforth, Playter Estates
+  E01: Riverdale, Leslieville
+  E02: Beaches, East End-Danforth
+  E03: East York, Danforth
   W07: Stonegate-Queensway
-  W08: Etobicoke (Kingsway South, Edenbridge-Humber Valley, Islington-City Centre West and others)
+  W08: Etobicoke (Kingsway South and others)

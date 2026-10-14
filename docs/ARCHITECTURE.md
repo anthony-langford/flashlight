@@ -1,6 +1,6 @@
 # Architecture
 
-Status: planned. Nothing below is implemented yet unless the README status says so.
+Status: data layer, export and first UI are built (see the README status). The causal map, derived metrics and hosting are still planned.
 
 ## Data flow
 
@@ -99,3 +99,12 @@ Explainers are written once, reviewed by the owner, and cached in the repo. They
 - Static front end on any static host.
 - Scheduled ingest (cron or CI) writing fresh JSON.
 - Per-source licence review first. TRREB, some FRED series and any third-party data may not be redistributable. See DATA_SOURCES.md.
+
+## Front end as built
+
+- `app/src/theme.ts` holds the color tokens (validated reference palette). It writes them to CSS custom properties and the chart code reads the same table, so there is one source of truth. `?theme=dark` forces a theme for screenshots.
+- `app/src/data.ts` loads the exported JSON from `data/` next to the page. Series files are fetched on demand and cached.
+- Charts use ECharts through a thin wrapper (`components/Chart.tsx`). Rules followed: 2px lines, hairline solid grid, one axis, legend for two or more series, selective direct labels, crosshair tooltip, a table view for every chart, and tooltip text is escaped. Fixed series colors: slot 1 blue, slot 2 orange.
+- Index series (CPI, new housing price index, US CPI) default to year-over-year in the app, and their percentile is ranked on year-over-year, not the level.
+- Navigation is hash based: `#/overview`, `#/indicators/<series id>`.
+- Verify visually with headless Chrome: `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --screenshot=out.png --window-size=1280,1500 --virtual-time-budget=9000 http://localhost:5173/`. The Homebrew `chromium` did not produce screenshots here.

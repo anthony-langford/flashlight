@@ -32,6 +32,19 @@ def test_yoy_skips_when_no_close_prior_observation():
     assert export.yoy_series(obs) == []
 
 
+def test_index_percentile_uses_year_over_year_not_level():
+    # A rising index level is always at its own high, so ranking the level would say 100.
+    obs = [
+        (date(2024, 6, 1), 100.0),
+        (date(2025, 6, 1), 110.0),  # +10 percent
+        (date(2026, 6, 1), 111.1),  # +1 percent
+    ]
+    s = _series("a.cpi", unit="index (2002=100)")
+    summary = export._summary(s, obs, date(2026, 7, 1), export.yoy_series(obs))
+    # year-over-year rates are [10.0, 1.0] and the latest is 1.0, so half are at or below it
+    assert summary["percentile"] == 50.0
+
+
 def test_percentile_rank():
     assert export.percentile_rank([1, 2, 3, 4], 4) == 100.0
     assert export.percentile_rank([1, 2, 3, 4], 1) == 25.0

@@ -8,7 +8,7 @@ Flashlight pulls public economic and housing data, explains each indicator in pl
 
 ## Status
 
-Last updated: 2026-10-14. Phase: M1 (data foundation) in progress. No application code is finished yet.
+Last updated: 2026-10-14. Phase: M1 (data foundation) and M2 (export and first UI) done. M3 (causal map) is next.
 
 - [x] Idea explored, market scanned, scope agreed ([docs/PROJECT.md](docs/PROJECT.md))
 - [x] Data source feasibility checked ([docs/DATA_SOURCES.md](docs/DATA_SOURCES.md))
@@ -23,8 +23,9 @@ Last updated: 2026-10-14. Phase: M1 (data foundation) in progress. No applicatio
 - [x] TRREB Market Watch parser: monthly district tables by home type (sales, prices, listings, SP/LP, days on market). Verified on Sept 2026 PDF (760 rows). `uv run python -m ingest trreb --from 2026-09`. MLS HPI benchmark prices by district also parsed (343 rows, positions-based). Older PDF layouts unsupported
 - [x] CMHC Rental Market Survey (Toronto CMA vacancy, turnover, two-bedroom rent and change; editions 2021 to 2025 downloaded and parsed). 4 series. Purpose-built apartments only
 - [x] Export step: `uv run python -m ingest export` writes catalogue summaries (latest value, 1-year change, year-over-year for index series, percentile, staleness), per-series JSON and TRREB tables to `app/public/data/` (gitignored). Buyer profile in `config/buyer.yaml`
-- [ ] React app scaffolded
-- [ ] First views, then causal map
+- [x] React app (Vite, TypeScript, ECharts) with two views: Overview (market snapshot tiles, target-district HPI benchmark chart against your budget band, district sales table) and Indicators (all 42 series with range filter, year-over-year toggle for index series, table view, percentile meter, draft explainers, source and licence). Light and dark themes, colors validated. Linkable via `#/indicators/<series id>`. 12 unit tests
+- [ ] Causal map (M3), owner review of drafted explainers and edges
+- [ ] Mortgage calculator (M4), blocked on verifying the rules listed below
 
 ## Buyer profile (drives priorities)
 
@@ -39,12 +40,13 @@ Stated by the owner on 2026-10-14.
 ## Next steps
 
 1. TRREB: find a way to recover history before Sept 2026 (older PDF layout). Until then history builds month by month.
-2. Scaffold the React app (Vite, TypeScript, ECharts) and build the first views from the exported JSON.
+2. Causal map: nodes and edges from `graph/`, React Flow view, node state colouring (M3). Needs owner review of the draft edges in docs/CAUSAL_MAP.md.
+3. Verify the mortgage and tax rules listed below against official sources, then build the payment calculator (M4).
 
 ## Milestones
 
 - **M1 Data foundation:** ingestion, catalogue, DuckDB, tests (current)
-- **M2 Export and first UI:** series pages with ECharts, last-updated labels, explainers, percentile gauges
+- **M2 Export and first UI:** done. See Status
 - **M3 Causal map:** React Flow view, owner review of draft edges, lead/lag evidence ([docs/CAUSAL_MAP.md](docs/CAUSAL_MAP.md))
 - **M4 Housing tools:** mortgage calculator on live rates, Toronto overview, release calendar, land transfer tax and closing costs
 - **M5 Discovery and polish:** LLM-assisted series suggestions checked against real series, weekly digest, hosting and licence review
@@ -106,6 +108,12 @@ uv run ruff check .  # lint
 uv run python -m ingest sync [--source boc_valet] [--series ID] [--full]
                      # fetch series into data/flashlight.duckdb
 uv run python -m ingest trreb --from 2026-09   # download and parse TRREB PDFs
+uv run python -m ingest export                 # write JSON for the app
+
+cd app && npm install
+npm run dev          # http://localhost:5173 (run the export first)
+npm test             # unit tests
+npm run build        # typecheck and build
 ```
 
 More commands are added here as the code lands.
@@ -130,4 +138,4 @@ Educational project. Nothing here is financial, mortgage or real estate advice.
 
 | Date | Summary |
 |---|---|
-| 2026-10-14 | Explored idea and market. Chose scope (Toronto housing, no China). Verified BoC, StatCan and FRED series and Toronto coverage. CMHC and TRREB are file-based only. Created repo and docs, pushed. Recorded buyer profile. Installed uv and Python 3.12. Made README the status source of truth. Built BoC, FRED and StatCan clients (38 series) and a TRREB PDF parser (Sept 2026 layout). Installed poppler. |
+| 2026-10-14 | Explored idea and market. Chose scope (Toronto housing, no China). Verified BoC, StatCan and FRED series and Toronto coverage. CMHC and TRREB are file-based only. Created repo and docs, pushed. Recorded buyer profile. Installed uv and Python 3.12. Made README the status source of truth. Built BoC, FRED and StatCan clients (38 series) and a TRREB PDF parser (Sept 2026 layout). Installed poppler. Added CMHC rent, JSON export and the React app (Overview and Indicators). |

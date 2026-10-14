@@ -80,7 +80,8 @@ def _summary(
         "stale_days": (today - latest_date).days,
         "change_1y_abs": change,
         "yoy_pct": yoy[-1][1] if yoy else None,
-        "percentile": percentile_rank([v for _, v in obs], latest),
+        # An index level rises over time, so rank its year-over-year rate instead.
+        "percentile": percentile_rank([v for _, v in (yoy or obs)], (yoy or obs)[-1][1]),
     }
 
 
