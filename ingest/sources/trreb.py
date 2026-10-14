@@ -192,7 +192,11 @@ _WORD = re.compile(
     r'<word xMin="(?P<x0>[\d.]+)" yMin="(?P<y0>[\d.]+)" '
     r'xMax="[\d.]+" yMax="[\d.]+">(?P<t>.*?)</word>'
 )
-_HPI_TITLE = re.compile(r"Home Price Index.*?, (?P<month>[A-Za-z]+) (?P<year>\d{4})\s*$")
+# Two wordings: "MLS Home Price Index ... City of Toronto, September 2026" (Sept 2026 layout) and
+# "Index and Benchmark Price, August 2026" (earlier layout).
+_HPI_TITLE = re.compile(
+    r"(?:Home Price Index.*?|Index and Benchmark Price), (?P<month>[A-Za-z]+) (?P<year>\d{4})\s*$"
+)
 
 
 @dataclass(frozen=True)
@@ -228,12 +232,14 @@ def _page_lines(page_html: str) -> list[list[tuple[float, str]]]:
 
 
 def _group_starts(lines: list[list[tuple[float, str]]]) -> list[float]:
-    # Only header rows (they also hold "Benchmark"), not the page title which contains "Index".
+    # A header row has one "Benchmark" per home-type group. Page titles can also contain both
+    # "Index" and "Benchmark" (for example "Index and Benchmark Price, September 2025"), so a
+    # single "Benchmark" does not make a header.
     xs = sorted(
         {
             x
             for line in lines
-            if any(t == "Benchmark" for _, t in line)
+            if sum(t == "Benchmark" for _, t in line) >= 3
             for x, t in line
             if t == "Index"
         }
@@ -267,7 +273,7 @@ def parse_hpi(bbox_html: str) -> list[HpiRow]:
                 continue
             area = " ".join(t for _, t in line[:first_num])
             nums = line[first_num:]
-            if len(nums) < 3 or len(nums) % 3:
+            if len(nums) < 3:
                 continue
             groups: dict[int, list[float]] = {}
             for x, t in nums:

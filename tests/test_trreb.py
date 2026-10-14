@@ -177,3 +177,38 @@ def test_hpi_upsert_is_idempotent():
     db.upsert_hpi(conn, rows)
     db.upsert_hpi(conn, rows)
     assert conn.execute("SELECT count(*) FROM trreb_hpi").fetchone()[0] == len(rows)
+
+
+def test_parse_hpi_title_containing_index_and_benchmark_is_not_a_header():
+    # Some months word the title "Index and Benchmark Price, September 2025", which holds both words
+    page = _hpi_page().replace(
+        "</page>",
+        _word(40, 40, "Index")
+        + _word(80, 40, "and")
+        + _word(110, 40, "Benchmark")
+        + _word(180, 40, "Price,")
+        + _word(230, 40, "September")
+        + _word(300, 40, "2025")
+        + "</page>",
+    )
+    rows = trreb.parse_hpi("<doc>" + page + "</doc>")
+    assert len(rows) > 0
+    assert {r.home_type for r in rows} >= {"composite", "sf_detached", "apartment"}
+
+
+def test_parse_hpi_keeps_a_row_when_one_group_is_incomplete():
+    # A group with a lone value (for example a bare "-100.00%") is skipped, other groups survive
+    page = _hpi_page().replace(
+        "</page>",
+        _word(31, 400, "Toronto")
+        + _word(87, 400, "W03")
+        + _word(194, 400, "341.7")
+        + _word(265, 400, "$861,400")
+        + _word(391, 400, "-4.45%")
+        + _word(1078, 400, "-100.00%")
+        + "</page>",
+    )
+    rows = trreb.parse_hpi("<doc>" + page + "</doc>")
+    w03 = {r.home_type: r for r in rows if r.area == "Toronto W03"}
+    assert w03["composite"].benchmark == 861_400
+    assert "townhouse" not in w03

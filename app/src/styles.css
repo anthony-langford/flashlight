@@ -661,3 +661,14 @@ input[type="checkbox"]:focus-visible {
   margin: 0;
   padding-left: 18px;
 }
+
+/* Benchmark trend panels */
+.trend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 14px;
+  margin: 8px 0;
+}
+.trend-title {
+  margin-bottom: 4px;
+}

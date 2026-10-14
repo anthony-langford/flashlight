@@ -40,16 +40,13 @@ def run_trreb(args: argparse.Namespace) -> int:
                 else:
                     rows = trreb.parse_text(trreb.pdf_to_text(path))
                     db.upsert_trreb(conn, rows)
-                    hpi = trreb.parse_hpi(trreb.pdf_to_bbox(path)) if rows else []
+                    hpi = trreb.parse_hpi(trreb.pdf_to_bbox(path))
                     db.upsert_hpi(conn, hpi)
-                    if rows:
-                        print(f"{year}-{month:02d}  {len(rows)} rows, {len(hpi)} HPI rows")
+                    if rows or hpi:
+                        note = "" if rows else " (sales tables not parsed: older layout)"
+                        print(f"{year}-{month:02d}  {len(rows)} rows, {len(hpi)} HPI rows{note}")
                     else:
-                        print(
-                            f"{year}-{month:02d}  layout not supported "
-                            "(only the Sept 2026 and later format is parsed)",
-                            file=sys.stderr,
-                        )
+                        print(f"{year}-{month:02d}  nothing parsed", file=sys.stderr)
                         failures += 1
             except Exception as exc:  # keep going so one bad month does not stop the rest
                 print(f"{year}-{month:02d}  error: {exc}", file=sys.stderr)
