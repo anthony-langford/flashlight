@@ -157,3 +157,15 @@ describe("paymentGrid", () => {
     expect(p[2]).toBeLessThan(p[3]);
   });
 });
+
+describe("Ontario page closed forms", () => {
+  // The Ontario land transfer tax page gives these formulas, an independent check on the brackets.
+  it("matches VOC x 0.02 - 3,525 from $400K to $2M and VOC x 0.025 - 13,525 above", () => {
+    for (const p of [400_000, 650_000, 1_100_000, 1_225_000, 1_350_000, 2_000_000]) {
+      expect(transferTax(p, ONTARIO_LTT)).toBeCloseTo(p * 0.02 - 3_525, 6);
+    }
+    for (const p of [2_000_001, 2_500_000, 3_000_000]) {
+      expect(transferTax(p, ONTARIO_LTT)).toBeCloseTo(p * 0.025 - 13_525, 6);
+    }
+  });
+});

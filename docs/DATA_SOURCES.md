@@ -14,7 +14,7 @@ Everything marked VERIFIED was fetched on 2026-10-14. "Latest" values are from t
 
 ## Licensing and hosting readiness
 
-Terms were read on 2026-10-14. This is a plain-language summary, not legal advice. Everything below is fine for local personal use. The right-hand column is what changes if the app is ever hosted.
+Terms were read on 2026-10-14 and the key phrases (CMHC personal use and prior written consent, StatCan attribution and sale rights, BoC attribution and LSEG-sourced indicative exchange rates) were re-checked against the raw page text the same day. This is a plain-language summary, not legal advice. Everything below is fine for local personal use. The right-hand column is what changes if the app is ever hosted.
 
 | Source | Terms read | If hosted |
 |---|---|---|

@@ -20,7 +20,7 @@ Flashlight is a personal learning tool for the Toronto housing market and surrou
 - Never commit third-party data, API keys or the DuckDB file. Before each commit, check that the staged diff does not contain the FRED key. Recorded HTTP fixtures must have `api_key` scrubbed.
 - Scope for now is Toronto housing. China is out of scope for the housing tool (a later macro dashboard).
 - Causal map edges are claims. Each needs a rationale and a confidence tag. Do not add unreviewed generated edges as "established".
-- Do not state mortgage or tax rules from memory. Verify against an official source first (see the README list).
+- Do not state mortgage or tax rules from memory. Verify against an official source first (docs/MORTGAGE_RULES.md). Page-reading tools summarise, so for any number the code depends on, download the raw HTML and search its text for the exact figure (curl, or headless Chrome `--dump-dom` for canada.ca). Record the check and its date.
 
 ## Review loop (after every step)
 
