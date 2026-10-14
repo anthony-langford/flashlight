@@ -1,0 +1,23 @@
+id: cmhc.toronto.vacancy_rate
+title: Toronto purpose-built rental vacancy rate (CMHC, October survey)
+source: cmhc_rental
+source_id: vacancy_rate
+source_ref: CMHC Rental Market Survey data tables, Table 1.0, Toronto CMA row
+frequency: annual
+unit: percent
+geography: Toronto CMA
+layer: rental
+explainer:
+  what: The share of purpose-built rental apartments in the Toronto area that were vacant at the time
+    of CMHC's October survey. It covers apartment buildings with three or more units that were built to
+    be rented. It excludes rented condos, houses and basement apartments.
+  why_it_matters: Low vacancy means tenants have little choice and rents rise faster. High vacancy gives
+    renters leverage. It is a gauge of rental demand against supply, and feeds the rent versus buy comparison.
+  how_to_read: Once a year, so it moves slowly. Rules of thumb for a balanced vacancy rate vary, so compare
+    it with its own history instead of a fixed threshold.
+  moves_with:
+  - cmhc.toronto.avg_rent_2br
+  - cmhc.toronto.turnover_rate
+licence_note: CMHC data. Terms not yet reviewed for hosting (https://www.cmhc-schl.gc.ca). Purpose-built
+  rental apartments of three units and over only.
+verified_on: '2026-10-14'

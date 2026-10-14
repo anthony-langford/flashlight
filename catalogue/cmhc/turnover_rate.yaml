@@ -1,0 +1,22 @@
+id: cmhc.toronto.turnover_rate
+title: Toronto purpose-built rental turnover rate (CMHC, October survey)
+source: cmhc_rental
+source_id: turnover_rate
+source_ref: CMHC Rental Market Survey data tables, Table 1.0, Toronto CMA row
+frequency: annual
+unit: percent
+geography: Toronto CMA
+layer: rental
+explainer:
+  what: The share of purpose-built rental units in the Toronto area where the tenant changed during the
+    year.
+  why_it_matters: Rent increase guidelines limit increases for many sitting tenants, while a unit that
+    turns over can reset to market rent. Higher turnover means more units move toward market rents.
+  how_to_read: Compare with the rent gap between turnover and non-turnover units in CMHC's Table 6.0 (not
+    yet loaded).
+  moves_with:
+  - cmhc.toronto.avg_rent_2br
+  - cmhc.toronto.vacancy_rate
+licence_note: CMHC data. Terms not yet reviewed for hosting (https://www.cmhc-schl.gc.ca). Purpose-built
+  rental apartments of three units and over only.
+verified_on: '2026-10-14'

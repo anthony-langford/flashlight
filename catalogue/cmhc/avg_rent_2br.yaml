@@ -1,0 +1,24 @@
+id: cmhc.toronto.avg_rent_2br
+title: Toronto average two-bedroom rent, purpose-built apartments (CMHC, October survey)
+source: cmhc_rental
+source_id: avg_rent_2br
+source_ref: CMHC Rental Market Survey data tables, Table 1.0, Toronto CMA row
+frequency: annual
+unit: dollars per month
+geography: Toronto CMA
+layer: rental
+explainer:
+  what: The average monthly rent for a two-bedroom purpose-built rental apartment in the Toronto area,
+    across new and existing buildings.
+  why_it_matters: The cost of renting is the comparison point for buying. It is an average across sitting
+    tenants and new leases, so it understates current asking rents.
+  how_to_read: Compare with the owned-accommodation cost trend. CMHC's rental condo two-bedroom average
+    was much higher ($2,891 against $2,046 in October 2025, Table 4.1), so market asking rents are above
+    this figure.
+  moves_with:
+  - cmhc.toronto.vacancy_rate
+  - cmhc.toronto.rent_change_2br
+  - statcan.toronto.cpi_rented_accommodation
+licence_note: CMHC data. Terms not yet reviewed for hosting (https://www.cmhc-schl.gc.ca). Purpose-built
+  rental apartments of three units and over only.
+verified_on: '2026-10-14'

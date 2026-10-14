@@ -10,6 +10,7 @@ class Source(StrEnum):
     BOC_VALET = "boc_valet"
     FRED = "fred"
     STATCAN = "statcan"
+    CMHC_RENTAL = "cmhc_rental"
     MANUAL = "manual"
 
 

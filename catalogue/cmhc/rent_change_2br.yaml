@@ -1,0 +1,22 @@
+id: cmhc.toronto.rent_change_2br
+title: Toronto two-bedroom rent change, fixed sample (CMHC, October survey)
+source: cmhc_rental
+source_id: rent_change_2br
+source_ref: CMHC Rental Market Survey data tables, Table 1.0, Toronto CMA row
+frequency: annual
+unit: percent
+geography: Toronto CMA
+layer: rental
+explainer:
+  what: The percentage change in average two-bedroom rent from the previous October, measured on the same
+    existing buildings only (a fixed sample).
+  why_it_matters: Because it holds the buildings constant, it is a cleaner measure of rent growth than
+    the change in the average rent.
+  how_to_read: Provincial guidelines limit rent increases for sitting tenants in many buildings, so this
+    is typically lower than growth in asking rents for new leases.
+  moves_with:
+  - cmhc.toronto.avg_rent_2br
+  - statcan.toronto.cpi_rented_accommodation
+licence_note: CMHC data. Terms not yet reviewed for hosting (https://www.cmhc-schl.gc.ca). Purpose-built
+  rental apartments of three units and over only.
+verified_on: '2026-10-14'

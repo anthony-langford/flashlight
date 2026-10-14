@@ -9,7 +9,7 @@ Everything marked VERIFIED was fetched on 2026-10-14. "Latest" values are from t
 | Bank of Canada Valet | REST API | none | JSON / CSV | VERIFIED |
 | Statistics Canada | WDS API, full-table CSV | none | JSON / CSV zip | VERIFIED (metadata and 2 CSVs) |
 | FRED | REST API | free API key | JSON / CSV | VERIFIED (IDs via public CSV graph endpoint) |
-| CMHC | Excel downloads | none | xlsx | PARTIAL (page checked, file not downloaded) |
+| CMHC | Excel downloads, parsed locally | none | xlsx | VERIFIED (editions 2021 to 2025) |
 | TRREB | PDF reports, parsed locally | none | PDF | VERIFIED for Sept 2026 layout onward. Older layout unsupported |
 
 ## Bank of Canada Valet
@@ -108,11 +108,13 @@ Terms (https://fred.stlouisfed.org/docs/api/terms_of_use.html, read 2026-10-14):
 
 ## CMHC
 
-- Rental Market Survey Data Tables (Excel), 2025 edition published 2025-12-11. Editions 2019 to 2025 listed. Includes vacancy rate and average rent. Geography includes "Greater Toronto Area". Annual (inferred from edition list, not stated).
+Rental Market Survey data tables (Excel), annual, October survey, published in December. Scope: purpose-built rental apartment structures of three units and over. Excludes rented condos, houses and basement apartments, so it is a context series for rent versus buy, not a freehold measure.
+
 - Page: https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market/rental-market-report-data-tables
-- The download button had no direct URL when fetched. Treat as a manual download into `data/manual/`. Whether a Toronto CMA breakdown exists inside the workbook is not yet checked.
-- Housing starts, completions and under construction are available through StatCan 34-10-0154-01 instead, so the CMHC portal is not needed for them.
-- CMHC Housing Market Information Portal was not examined.
+- Direct file URLs (found in the page source, verified 2026-10-14): `https://assets.cmhc-schl.gc.ca/sites/cmhc/professional/housing-markets-data-and-research/housing-data-tables/rental-market/rental-market-report-data-tables/{year}/rmr-canada-{year}-en.xlsx`. Editions 2021 to 2025 exist (the 2025-style file name also serves older years). 2019 and 2020 returned 404. The 2026 edition is expected around December 2026.
+- Parsed (ingest/sources/cmhc.py): Table 1.0, row `Toronto CMA`. Each edition has two October readings, editions overlap, newest wins. Series: `cmhc.toronto.vacancy_rate`, `turnover_rate`, `avg_rent_2br` (new and existing structures), `rent_change_2br` (fixed sample, existing structures only). Loaded 2020 to 2025: vacancy 3.4, 4.6, 1.6, 1.4, 2.5, 3.0 percent. Average two-bedroom rent $1,635, $1,679, $1,779, $1,961, $1,974, $2,046.
+- Other tables in the workbook, not loaded: 4.1 and 4.2 (rental condo apartments, Toronto two-bedroom average $2,891 in Oct 2025), 5.0 (arrears), 6.0 to 6.2 (turnover versus non-turnover rents). Table 6.0 and 6.2 would show the gap between sitting-tenant and market rents.
+- Housing starts, completions and under construction come from StatCan 34-10-0154-01 instead. The CMHC Housing Market Information Portal was not examined.
 
 ## TRREB (Toronto Regional Real Estate Board)
 
@@ -145,6 +147,6 @@ Treat the district-to-neighbourhood mapping as a working assumption until checke
 4. **Debt service ratio, household debt, wages, GDP, rents by unit type.** Not yet located. Candidates: StatCan household debt service ratio table, StatCan wage tables, CPI rent index.
 5. **StatCan and BoC licence terms** have not been read.
 6. ~~WDS vector endpoints untested.~~ Done 2026-10-14, see above.
-7. **CMHC workbook** not downloaded or inspected.
+7. ~~CMHC workbook not downloaded or inspected.~~ Done 2026-10-14. Remaining: rent for houses and condos is not covered by the survey tables loaded here.
 8. **TRREB** history before Sept 2026 (old PDF layout), current community report URL, and permission to reuse if hosting.
 9. **Neighbourhood to district mapping** for Monarch Park and Sunnylea (see above).

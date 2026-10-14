@@ -12,7 +12,7 @@ import httpx
 from ingest import db
 from ingest.config import redact
 from ingest.models import Observation, SeriesDef, Source
-from ingest.sources import boc, fred, statcan
+from ingest.sources import boc, cmhc, fred, statcan
 
 log = logging.getLogger(__name__)
 
@@ -22,6 +22,7 @@ FETCHERS: dict[Source, Fetcher] = {
     Source.BOC_VALET: boc.fetch,
     Source.FRED: fred.fetch,
     Source.STATCAN: statcan.fetch,
+    Source.CMHC_RENTAL: cmhc.fetch,
 }
 
 FETCH_ATTEMPTS = 3
