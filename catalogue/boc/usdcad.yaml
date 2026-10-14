@@ -1,0 +1,19 @@
+id: boc.usdcad
+title: USD/CAD exchange rate (Canadian dollars per US dollar)
+source: boc_valet
+source_id: FXUSDCAD
+frequency: daily
+unit: CAD per USD
+geography: Canada
+layer: canada_macro
+explainer:
+  what: How many Canadian dollars one US dollar buys, as published by the Bank of Canada.
+  why_it_matters: A weaker Canadian dollar raises import costs and can feed inflation. It also reflects
+    the gap between Canadian and US rates and the oil price.
+  how_to_read: A higher number means a weaker Canadian dollar.
+  moves_with:
+  - fred.wti_oil
+  - fred.fed_funds
+  - boc.policy_rate
+licence_note: Bank of Canada terms apply (https://www.bankofcanada.ca/terms/). Not yet reviewed for hosting.
+verified_on: '2026-10-14'

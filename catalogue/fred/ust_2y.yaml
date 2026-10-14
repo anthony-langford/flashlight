@@ -1,0 +1,18 @@
+id: fred.ust_2y
+title: US Treasury yield, 2-year
+source: fred
+source_id: DGS2
+frequency: daily
+unit: percent
+geography: United States
+layer: us_inputs
+explainer:
+  what: The market yield on a 2-year US Treasury note.
+  why_it_matters: It reflects expected Fed policy over the next two years and moves ahead of the Fed.
+  how_to_read: Compare it with the fed funds rate. Below it suggests the market expects cuts.
+  moves_with:
+  - fred.fed_funds
+  - boc.gov_2y_yield
+licence_note: FRED API terms apply (https://fred.stlouisfed.org/docs/api/terms_of_use.html). Hosted use
+  needs the required notice and must not replicate the FRED site.
+verified_on: '2026-10-14'

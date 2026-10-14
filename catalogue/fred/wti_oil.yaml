@@ -1,0 +1,18 @@
+id: fred.wti_oil
+title: WTI crude oil price
+source: fred
+source_id: DCOILWTICO
+frequency: daily
+unit: dollars per barrel
+geography: Global
+layer: canada_macro
+explainer:
+  what: The spot price of West Texas Intermediate crude oil.
+  why_it_matters: Oil is a major Canadian export, so it influences the Canadian dollar, national income
+    and the Alberta economy.
+  how_to_read: Large sustained moves matter more than daily noise. The data lags by about a week.
+  moves_with:
+  - boc.usdcad
+licence_note: FRED API terms apply (https://fred.stlouisfed.org/docs/api/terms_of_use.html). Hosted use
+  needs the required notice and must not replicate the FRED site.
+verified_on: '2026-10-14'

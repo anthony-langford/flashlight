@@ -1,0 +1,19 @@
+id: fred.us_cpi
+title: US consumer price index, all urban consumers
+source: fred
+source_id: CPIAUCSL
+frequency: monthly
+unit: index 1982-1984=100
+geography: United States
+layer: us_inputs
+seasonal_adj: true
+explainer:
+  what: The price level of a basket of consumer goods and services in the US. This is an index level,
+    not an inflation rate.
+  why_it_matters: US inflation drives Fed decisions, which flow through to yields and rates globally.
+  how_to_read: Look at the year-over-year change in the index, not the level. The app should derive it.
+  moves_with:
+  - fred.fed_funds
+licence_note: FRED API terms apply (https://fred.stlouisfed.org/docs/api/terms_of_use.html). Hosted use
+  needs the required notice and must not replicate the FRED site.
+verified_on: '2026-10-14'

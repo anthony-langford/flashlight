@@ -1,0 +1,21 @@
+id: fred.ust_10y
+title: US Treasury yield, 10-year
+source: fred
+source_id: DGS10
+frequency: daily
+unit: percent
+geography: United States
+layer: us_inputs
+explainer:
+  what: The market yield on a 10-year US Treasury note, the world's main benchmark for long-term borrowing
+    costs.
+  why_it_matters: Canadian bond yields co-move with US yields, so this is a leading influence on Canadian
+    fixed mortgage rates.
+  how_to_read: Watch changes over weeks. Large moves tend to carry over to Canadian yields.
+  moves_with:
+  - boc.gov_5y_yield
+  - boc.gov_10y_yield
+  - fred.ust_2s10s
+licence_note: FRED API terms apply (https://fred.stlouisfed.org/docs/api/terms_of_use.html). Hosted use
+  needs the required notice and must not replicate the FRED site.
+verified_on: '2026-10-14'

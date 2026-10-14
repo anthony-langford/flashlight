@@ -57,3 +57,11 @@ def test_repo_catalogue_is_valid():
     assert len(ids) == len(set(ids))
     for s in series:
         assert s.explainer is not None, f"{s.id} is missing an explainer"
+
+
+def test_moves_with_references_resolve():
+    series = load_catalogue()
+    ids = {s.id for s in series}
+    for s in series:
+        for ref in s.explainer.moves_with:
+            assert ref in ids, f"{s.id} references unknown series {ref}"

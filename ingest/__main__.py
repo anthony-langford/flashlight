@@ -8,6 +8,7 @@ import httpx
 
 from ingest import db
 from ingest.catalogue import load_catalogue
+from ingest.config import load_env
 from ingest.sync import sync
 
 
@@ -21,7 +22,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--db", default=str(db.DEFAULT_DB_PATH))
     args = parser.parse_args(argv)
 
+    load_env()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    # httpx logs full request URLs at INFO, which would include API keys.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     series = load_catalogue()
     if args.source:
         series = [s for s in series if s.source.value == args.source]

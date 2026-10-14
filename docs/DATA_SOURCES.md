@@ -79,16 +79,18 @@ API: `https://api.stlouisfed.org/fred/series/observations?series_id=...&api_key=
 | `fred.ust_2s10s` | `T10Y2Y` | 10-year minus 2-year spread | daily | 0.42 (2026-10-13) |
 | `fred.us_cpi` | `CPIAUCSL` | US CPI, all urban consumers, SA | monthly | 336.298 (2026-09) |
 | `fred.us_unemployment` | `UNRATE` | US unemployment rate | monthly | 4.2 (2026-09) |
-| `fred.us_mortgage_30y` | `MORTGAGE30US` | 30-year fixed mortgage rate | weekly | 7.40 (2026-10-08) |
-| `fred.usdcad` | `DEXCAUS` | CAD per USD | daily | 1.4269 (2026-10-09) |
+| `fred.us_mortgage_30y` | `MORTGAGE30US` | 30-year fixed mortgage rate | weekly | 7.40 (2026-10-08). FRED notes carry a third-party copyright flag. |
+| `fred.wti_oil` | `DCOILWTICO` | WTI crude oil, dollars per barrel | daily | data to 2026-10-06 (lags about a week) |
 
-Not yet checked: WTI oil price (`DCOILWTICO` expected), US GDP, economic policy uncertainty indices.
+Not yet checked: US GDP, economic policy uncertainty indices.
+
+USD/CAD is taken from the Bank of Canada instead (`boc.usdcad`, Valet `FXUSDCAD`, daily, history only from 2017-01-03, verified 2026-10-14). The FRED series `DEXCAUS` carries a copyright notice and is not used.
 
 Terms (https://fred.stlouisfed.org/docs/api/terms_of_use.html, read 2026-10-14):
 
 - Must show: "This product uses the FRED(R) API but is not endorsed or certified by the Federal Reserve Bank of St. Louis." If the app is for other users, also link to the terms.
 - Must not replicate the essential user experience of the FRED site, or use FRED / Federal Reserve names in the hostname or logos.
-- Series with "Copyright" in their notes are third-party. Beyond personal use they need the owner's permission. `DEXCAUS` shows a copyright notice (tagged "Public Domain: Citation Requested", source: Federal Reserve Board). Prefer a Bank of Canada FX series if hosting.
+- Series with "Copyright" in their notes are third-party. Beyond personal use they need the owner's permission. Of the series in use, `MORTGAGE30US` has such a note (checked via the series metadata API on 2026-10-14). Drop it or get permission before hosting.
 
 ## CMHC
 

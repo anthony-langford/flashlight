@@ -1,0 +1,19 @@
+id: fred.us_mortgage_30y
+title: US 30-year fixed mortgage rate
+source: fred
+source_id: MORTGAGE30US
+frequency: weekly
+unit: percent
+geography: United States
+layer: us_inputs
+explainer:
+  what: The average 30-year fixed mortgage rate in the US from a weekly survey.
+  why_it_matters: A comparison point for how much of a rate move is global versus specific to Canada's
+    mortgage market.
+  how_to_read: Canadian fixed mortgages are shorter-term (usually 5 years) and priced differently, so
+    compare changes, not levels.
+  moves_with:
+  - fred.ust_10y
+licence_note: 'Third-party copyright: FRED notes flag this series (Freddie Mac). Personal use only. Get
+  permission before hosting.'
+verified_on: '2026-10-14'

@@ -8,8 +8,9 @@ import duckdb
 import httpx
 
 from ingest import db
+from ingest.config import redact
 from ingest.models import Observation, SeriesDef, Source
-from ingest.sources import boc
+from ingest.sources import boc, fred
 
 log = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ Fetcher = Callable[[SeriesDef, httpx.Client, date | None], list[Observation]]
 
 FETCHERS: dict[Source, Fetcher] = {
     Source.BOC_VALET: boc.fetch,
+    Source.FRED: fred.fetch,
 }
 
 # Re-fetch a window before the last stored observation so late revisions are picked up.
@@ -50,8 +52,9 @@ def sync(
         try:
             observations = fetch(s, client, since)
         except Exception as exc:  # one bad series must not abort the run
-            log.warning("fetch failed for %s: %s", s.id, exc)
-            db.log_fetch(conn, s.id, 0, "error", str(exc)[:500])
+            message = redact(str(exc))
+            log.warning("fetch failed for %s: %s", s.id, message)
+            db.log_fetch(conn, s.id, 0, "error", message[:500])
             results[s.id] = "error"
             continue
         db.upsert_observations(conn, s.id, observations)

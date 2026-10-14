@@ -1,0 +1,18 @@
+id: fred.us_unemployment
+title: US unemployment rate
+source: fred
+source_id: UNRATE
+frequency: monthly
+unit: percent
+geography: United States
+layer: us_inputs
+seasonal_adj: true
+explainer:
+  what: The share of the US labour force that is unemployed and looking for work.
+  why_it_matters: A key input to Fed policy and a read on the health of Canada's largest trading partner.
+  how_to_read: Rapid increases from a low level are more important than the level itself.
+  moves_with:
+  - fred.fed_funds
+licence_note: FRED API terms apply (https://fred.stlouisfed.org/docs/api/terms_of_use.html). Hosted use
+  needs the required notice and must not replicate the FRED site.
+verified_on: '2026-10-14'

@@ -1,0 +1,19 @@
+id: fred.ust_2s10s
+title: US Treasury yield curve spread (10-year minus 2-year)
+source: fred
+source_id: T10Y2Y
+frequency: daily
+unit: percentage points
+geography: United States
+layer: us_inputs
+explainer:
+  what: The 10-year Treasury yield minus the 2-year yield.
+  why_it_matters: A negative spread (inverted curve) has often come before US slowdowns. It is a sentiment
+    gauge for growth expectations.
+  how_to_read: Below zero is inverted. The signal is about timing and direction, not a precise forecast.
+  moves_with:
+  - fred.ust_10y
+  - fred.ust_2y
+licence_note: FRED API terms apply (https://fred.stlouisfed.org/docs/api/terms_of_use.html). Hosted use
+  needs the required notice and must not replicate the FRED site.
+verified_on: '2026-10-14'

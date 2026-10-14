@@ -1,0 +1,20 @@
+id: fred.fed_funds
+title: Effective federal funds rate
+source: fred
+source_id: DFF
+frequency: daily
+unit: percent
+geography: United States
+layer: us_inputs
+explainer:
+  what: The rate US banks actually pay each other for overnight loans, steered by the US Federal Reserve.
+  why_it_matters: Fed policy shapes US bond yields and the US dollar, and Canadian yields and the Bank
+    of Canada often follow. It is an upstream input to Canadian mortgage rates.
+  how_to_read: Compare it with the Bank of Canada policy rate. A widening gap can pressure the Canadian
+    dollar.
+  moves_with:
+  - boc.policy_rate
+  - fred.ust_2y
+licence_note: FRED API terms apply (https://fred.stlouisfed.org/docs/api/terms_of_use.html). Hosted use
+  needs the required notice and must not replicate the FRED site.
+verified_on: '2026-10-14'
