@@ -1,0 +1,23 @@
+id: statcan.toronto.housing_starts_total
+title: Toronto housing starts, all unit types (CMHC)
+source: statcan
+source_id: '42127475'
+source_ref: Table 34-10-0154-01, coordinate 23.1.1.0.0.0.0.0.0.0 (Toronto, Ontario;Housing starts;Total
+  units)
+frequency: monthly
+unit: units
+geography: Toronto CMA
+layer: supply
+explainer:
+  what: The number of new homes where construction began in the month, in the Toronto area. Source is
+    CMHC, published through Statistics Canada.
+  why_it_matters: Starts show how much new supply is coming, with a lag of one to three years before completion.
+    In recent months single-detached and semi-detached homes were a small fraction of the total, so this
+    headline number is mostly not freehold supply.
+  how_to_read: Monthly values are volatile. Use a 6 to 12 month average and compare with completions.
+  moves_with:
+  - statcan.toronto.housing_under_construction_total
+  - statcan.toronto.housing_completions_total
+  - statcan.toronto.permits_residential_units_created
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

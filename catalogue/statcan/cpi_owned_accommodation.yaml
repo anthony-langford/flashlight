@@ -1,0 +1,21 @@
+id: statcan.toronto.cpi_owned_accommodation
+title: Toronto consumer price index, owned accommodation
+source: statcan
+source_id: '41692891'
+source_ref: Table 18-10-0004-01, coordinate 16.84.0.0.0.0.0.0.0.0 (Toronto, Ontario;Owned accommodation)
+frequency: monthly
+unit: index (2002=100)
+geography: Toronto CMA
+layer: canada_macro
+explainer:
+  what: The price level of the costs of owning a home in Toronto, including mortgage interest cost, property
+    taxes, insurance and maintenance (not the purchase price itself).
+  why_it_matters: It shows how the running cost of ownership has changed, driven strongly by mortgage
+    interest cost.
+  how_to_read: Compute the year-over-year change. Rising mortgage rates push it up with a lag as mortgages
+    renew.
+  moves_with:
+  - statcan.toronto.cpi_shelter
+  - boc.mortgage_5y_posted
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

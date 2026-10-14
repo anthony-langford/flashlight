@@ -46,24 +46,38 @@ Access paths:
 
 - Table metadata: `POST https://www150.statcan.gc.ca/t1/wds/rest/getCubeMetadata` with body `[{"productId": 34100154}]`. VERIFIED, returns title, dimensions, members, `cubeEndDate`.
 - Full table CSV: `https://www150.statcan.gc.ca/n1/tbl/csv/{productId}-eng.zip`. VERIFIED, but large (14100459 is about 4 MB zipped, 61 MB unzipped. 34100292 is over 100 MB zipped). Avoid for big tables.
-- Vector-based fetch (`getDataFromVectorsAndLatestNPeriods` and coordinate lookup) is documented but NOT yet tested. This is the intended path for production ingest.
+- Vector lookup: `POST getSeriesInfoFromCubePidCoord` with `[{"productId": ..., "coordinate": "26.5.1.1.0.0.0.0.0.0"}]`. VERIFIED 2026-10-14. A coordinate is the member ids of each dimension in position order, zero-padded to 10 places.
+- Data fetch: `POST getDataFromVectorsAndLatestNPeriods` with `[{"vectorId": N, "latestN": N}]`. VERIFIED. `latestN` of 5000 returns the full history. This is what the ingest client uses.
+- **Pitfall: results are NOT returned in request order.** Both endpoints can reorder a batch. Match results on the returned `productId` and `coordinate` (lookup) or `vectorId` (data), never by position. The client does this and a test covers it.
+- A coordinate for a series that does not exist returns `responseStatusCode` 2 and `vectorId` 0, not an HTTP error.
+- Documented limits: 25 requests per second per IP. Data updates at 8:30 ET on business days. HTTP 409 means the table is locked for update.
 
-| Internal slug (proposed) | Table | Geography seen | Frequency | Range / latest |
+Vector IDs below were resolved and checked live on 2026-10-14. The catalogue (`catalogue/statcan/`) is the source of truth. Each entry records the table and coordinate in `source_ref`.
+
+| Catalogue id (`statcan.toronto.` + ...) | Table | Vector | Frequency | History loaded |
 |---|---|---|---|---|
-| `statcan.toronto.labour` | 14-10-0459-01 Labour force characteristics by CMA, three-month moving average, seasonally adjusted | `Toronto, Ontario` | monthly | 2011-01 to 2026-09 |
-| `statcan.toronto.housing_starts` | 34-10-0154-01 CMHC housing starts, under construction and completions, selected CMAs | `Toronto, Ontario` | monthly | 1972-01 to 2026-08 |
-| `statcan.toronto.building_permits` | 34-10-0292-01 Building permits by type of structure and type of work | `Toronto, Ontario` | monthly | to 2026-08 |
-| `statcan.toronto.cpi` | 18-10-0004-01 CPI, monthly, not seasonally adjusted (359 product groups) | `Toronto, Ontario` | monthly | to 2026-08 |
-| `statcan.toronto.nhpi` | 18-10-0205-01 New housing price index, monthly (3 indexes) | `Toronto, Ontario` | monthly | to 2026-08 |
-| `statcan.toronto.population` | 17-10-0148-01 Population estimates, July 1, by CMA, 2021 boundaries | `Toronto (CMA), Ontario` | annual | to 2025 |
-| `statcan.canada.labour` | 14-10-0287-01 Labour force characteristics, monthly, SA | Canada, provinces only (no CMAs) | monthly | to 2026-09 |
+| `unemployment_rate`, `employment_rate`, `participation_rate`, `employment` | 14-10-0459-01 (three-month moving average, seasonally adjusted) | 1643279334, 1643279350, 1643279342, 1643279318 | monthly | 2011-01 to 2026-09 |
+| `housing_starts_total`, `_single`, `_semi` | 34-10-0154-01 | 42127475, 42127476, 42127477 | monthly | 1972-01 to 2026-08 |
+| `housing_under_construction_total` | 34-10-0154-01 | 42127480 | monthly | 1972-01 to 2026-08 |
+| `housing_completions_total` | 34-10-0154-01 | 42127485 | monthly | 1972-01 to 2026-08 |
+| `cpi_all_items`, `cpi_shelter`, `cpi_rented_accommodation`, `cpi_owned_accommodation` | 18-10-0004-01 | 41692888, 41692889, 41692890, 41692891 | monthly | 1971/1978 to 2026-08 |
+| `nhpi_total`, `nhpi_house_only`, `nhpi_land_only` | 18-10-0205-01 | 111955499, 111955500, 111955501 | monthly | 1981-01 to 2026-08 |
+| `population` | 17-10-0148-01 (CMA, 2021 boundaries) | 1589887692 | annual | 2001 to 2025 |
+| `permits_residential_units_created` (SA) | 34-10-0292-01 | 1675217379 | monthly | 2018-01 to 2026-08 |
+| `permits_residential_value` (SA, thousands of dollars) | 34-10-0292-01 | 1675119950 | monthly | 2018-01 to 2026-08 |
+
+Not used: `statcan.canada.labour` (14-10-0287-01, national and provincial only).
 
 Notes:
 
 - Table 14-10-0380-01 (an earlier guess for Toronto labour data) is archived. Use 14-10-0459-01.
 - Table 14-10-0459-01 dimensions: characteristic (Employment, Employment rate, Labour force, Participation rate, Population, Unemployment, Unemployment rate), statistics (estimate and standard errors), data type (seasonally adjusted, unadjusted).
 - Table 34-10-0154-01 dimensions: housing estimate (starts, under construction, completions) by type of unit (single, semi, row, apartment, total).
-- 18-10-0004-01 includes shelter components (rent, owned accommodation, mortgage interest cost are expected among the 359 product groups. Not individually checked). Rent index can proxy for rent growth.
+- 18-10-0004-01: the finer "Rent" and "Mortgage interest cost" series do NOT exist for Toronto (checked, status 2). The parents "Rented accommodation" and "Owned accommodation" do, and are used.
+- Table 14-10-0459-01 is a three-month moving average, so it lags turning points. Its 2026-09 value covers roughly July to September.
+- Employment is in thousands of persons. Population is in persons. Building permit value is in thousands of dollars.
+- Land-only new housing price index values carry a StatCan quality flag (code 7, grade E) in recent months.
+- Annual population values are tagged with the January date of the reference year (the estimate is for July 1).
 - Table 34-10-0135-01 (quarterly starts, Canada and provinces only) is not needed.
 
 ## FRED
@@ -114,6 +128,6 @@ Terms (https://fred.stlouisfed.org/docs/api/terms_of_use.html, read 2026-10-14):
 3. **Mortgage stress test floor.** The "greater of contract rate plus 2% or 5.25%" rule was stated from memory. It was not verified. Verify against OSFI before using it in the calculator.
 4. **Debt service ratio, household debt, wages, GDP, rents by unit type.** Not yet located. Candidates: StatCan household debt service ratio table, StatCan wage tables, CPI rent index.
 5. **StatCan and BoC licence terms** have not been read.
-6. **WDS vector endpoints** untested.
+6. ~~WDS vector endpoints untested.~~ Done 2026-10-14, see above.
 7. **CMHC workbook** not downloaded or inspected.
 8. **TRREB** inventory / days-on-market availability and permission to reuse.

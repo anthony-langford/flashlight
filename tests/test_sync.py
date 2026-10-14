@@ -101,3 +101,59 @@ def test_unknown_source_is_skipped():
 
 def test_lookback_is_a_window_not_zero():
     assert REVISION_LOOKBACK > timedelta(0)
+
+
+def _run_one(fetch):
+    conn = db.connect(":memory:")
+    sleeps = []
+    with httpx.Client() as client:
+        result = sync(
+            conn,
+            [_series("a.one")],
+            client,
+            fetchers={Source.BOC_VALET: fetch},
+            sleep=sleeps.append,
+        )
+    return result, sleeps
+
+
+def test_transient_error_is_retried_then_succeeds():
+    attempts = []
+
+    def fetch(series, client, since):
+        attempts.append(1)
+        if len(attempts) < 3:
+            raise httpx.ConnectTimeout("handshake timed out")
+        return _obs((date(2026, 1, 1), 1.0))
+
+    result, sleeps = _run_one(fetch)
+    assert result == {"a.one": "ok"}
+    assert len(attempts) == 3
+    assert sleeps == [1, 2]
+
+
+def test_client_error_is_not_retried():
+    attempts = []
+
+    def fetch(series, client, since):
+        attempts.append(1)
+        request = httpx.Request("GET", "https://example.com")
+        raise httpx.HTTPStatusError("nope", request=request, response=httpx.Response(404))
+
+    result, sleeps = _run_one(fetch)
+    assert result == {"a.one": "error"}
+    assert len(attempts) == 1
+    assert sleeps == []
+
+
+def test_server_error_exhausts_attempts_then_fails():
+    attempts = []
+
+    def fetch(series, client, since):
+        attempts.append(1)
+        request = httpx.Request("GET", "https://example.com")
+        raise httpx.HTTPStatusError("boom", request=request, response=httpx.Response(503))
+
+    result, _ = _run_one(fetch)
+    assert result == {"a.one": "error"}
+    assert len(attempts) == 3

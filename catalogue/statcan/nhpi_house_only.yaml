@@ -1,0 +1,19 @@
+id: statcan.toronto.nhpi_house_only
+title: Toronto new housing price index, house only
+source: statcan
+source_id: '111955500'
+source_ref: Table 18-10-0205-01, coordinate 20.2.0.0.0.0.0.0.0.0 (Toronto, Ontario;House only)
+frequency: monthly
+unit: index (2016-12=100)
+geography: Toronto CMA
+layer: toronto_market
+explainer:
+  what: The price index for the building component of new homes in Toronto, excluding the land.
+  why_it_matters: Construction costs show up here. Compare with the land index to see which is driving
+    new-home prices.
+  how_to_read: Compute the year-over-year change.
+  moves_with:
+  - statcan.toronto.nhpi_total
+  - statcan.toronto.nhpi_land_only
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

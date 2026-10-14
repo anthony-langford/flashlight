@@ -1,0 +1,19 @@
+id: statcan.toronto.participation_rate
+title: Toronto labour force participation rate (three-month moving average, seasonally adjusted)
+source: statcan
+source_id: '1643279342'
+source_ref: Table 14-10-0459-01, coordinate 26.6.1.1.0.0.0.0.0.0 (Toronto, Ontario;Participation rate;Estimate;Seasonally
+  adjusted)
+frequency: monthly
+unit: percent
+geography: Toronto CMA
+layer: demand
+seasonal_adj: true
+explainer:
+  what: The share of the working-age population that is working or looking for work.
+  why_it_matters: Shifts in participation change how to read the unemployment rate.
+  how_to_read: It moves slowly. Changes of a few tenths of a point are mostly noise.
+  moves_with:
+  - statcan.toronto.employment_rate
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

@@ -1,0 +1,20 @@
+id: statcan.toronto.housing_completions_total
+title: Toronto housing completions, all unit types (CMHC)
+source: statcan
+source_id: '42127485'
+source_ref: Table 34-10-0154-01, coordinate 23.3.1.0.0.0.0.0.0.0 (Toronto, Ontario;Housing completions;Total
+  units)
+frequency: monthly
+unit: units
+geography: Toronto CMA
+layer: supply
+explainer:
+  what: The number of homes completed in the Toronto area in the month.
+  why_it_matters: Completions are supply actually arriving on the market, adding to rental and resale
+    inventory.
+  how_to_read: Use a 6 to 12 month average. Completions follow starts with a lag of years.
+  moves_with:
+  - statcan.toronto.housing_under_construction_total
+  - statcan.toronto.housing_starts_total
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

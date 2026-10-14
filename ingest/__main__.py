@@ -37,7 +37,8 @@ def main(argv: list[str] | None = None) -> int:
 
     conn = db.connect(args.db)
     headers = {"User-Agent": "flashlight/0.1 (personal project)"}
-    with httpx.Client(timeout=30.0, headers=headers) as client:
+    transport = httpx.HTTPTransport(retries=3)  # retries connect and handshake failures
+    with httpx.Client(timeout=30.0, headers=headers, transport=transport) as client:
         results = sync(conn, series, client, full=args.full)
     for sid, status in results.items():
         print(f"{status:8} {sid}")

@@ -1,0 +1,21 @@
+id: statcan.toronto.permits_residential_units_created
+title: Toronto building permits, residential dwelling units created (seasonally adjusted)
+source: statcan
+source_id: '1675217379'
+source_ref: Table 34-10-0292-01, coordinate 45.4.1.2.2.0.0.0.0.0 (Toronto, Ontario;Total residential;Types
+  of work, total;Number of dwelling-units created;Seasonally adjusted, current)
+frequency: monthly
+unit: units
+geography: Toronto CMA
+layer: supply
+seasonal_adj: true
+explainer:
+  what: The number of new dwelling units authorised by building permits in the month in Toronto. Permits
+    come before construction starts.
+  why_it_matters: A leading indicator of future starts and, later, completions.
+  how_to_read: Noisy. Use a 6 to 12 month average and compare with starts.
+  moves_with:
+  - statcan.toronto.housing_starts_total
+  - statcan.toronto.permits_residential_value
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

@@ -15,11 +15,11 @@ Last updated: 2026-10-14. Phase: M1 (data foundation) in progress. No applicatio
 - [x] Repo, license, gitignore, design docs
 - [x] Toolchain: `uv` 0.13 and managed Python 3.12 installed (via Homebrew), Node 26 available
 - [x] Python project scaffolded (`pyproject.toml`, `ingest/` package, pytest, ruff)
-- [ ] Series catalogue (YAML) for the v1 series: Bank of Canada (11 incl. USD/CAD) and FRED (8) done, 19 series with drafted explainers awaiting owner review. StatCan and manual still to do
+- [ ] Series catalogue (YAML) for the v1 series: 38 series done (BoC 11 incl. USD/CAD, FRED 8, StatCan Toronto 19), all with drafted explainers awaiting owner review. Manual series (TRREB, CMHC rent) still to do
 - [x] Bank of Canada Valet client (tests, fixture). `uv run python -m ingest sync --source boc_valet` loads all 10 BoC series (verified 2026-10-14, history from 1975 to 2001 depending on series)
 - [x] DuckDB schema, idempotent upserts, 45-day revision lookback, per-series error isolation
 - [x] FRED client (key via `.env`, redacted from logs, errors and the DB; tests). 8 FRED series plus BoC USD/CAD synced live 2026-10-14
-- [ ] StatCan client (vector-based)
+- [x] StatCan client (vector-based, verified live; matches results by vector id because the API reorders batches). Retry with backoff for transient errors
 - [ ] Manual-entry templates (TRREB, CMHC rent)
 - [ ] Export step to JSON
 - [ ] React app scaffolded
@@ -37,9 +37,8 @@ Stated by the owner on 2026-10-14.
 
 ## Next steps
 
-1. StatCan client: take Toronto vector IDs from the full-table CSVs, then test the WDS vector endpoints.
-2. Manual-entry templates: TRREB monthly by district and property type, CMHC rent.
-3. Export to JSON, then scaffold the React app.
+1. Manual-entry templates: TRREB monthly by district and property type, CMHC rent.
+2. Export to JSON (with derived series such as year-over-year change and percentiles), then scaffold the React app.
 
 ## Milestones
 
@@ -72,7 +71,7 @@ None of these are stated from memory in the docs. Verify each against an officia
 
 ## Open data items
 
-Tracked in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) under "Known gaps and open items". Highest priority: Toronto population components, WDS vector endpoint test, CMHC workbook inspection, StatCan and BoC licence terms.
+Tracked in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) under "Known gaps and open items". Highest priority: Toronto population components, CMHC workbook inspection, StatCan and BoC licence terms.
 
 ## What it is
 

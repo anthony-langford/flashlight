@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+import ssl
+import time
 from collections.abc import Callable, Iterable
 from datetime import date, timedelta
 
@@ -10,7 +12,7 @@ import httpx
 from ingest import db
 from ingest.config import redact
 from ingest.models import Observation, SeriesDef, Source
-from ingest.sources import boc, fred
+from ingest.sources import boc, fred, statcan
 
 log = logging.getLogger(__name__)
 
@@ -19,7 +21,39 @@ Fetcher = Callable[[SeriesDef, httpx.Client, date | None], list[Observation]]
 FETCHERS: dict[Source, Fetcher] = {
     Source.BOC_VALET: boc.fetch,
     Source.FRED: fred.fetch,
+    Source.STATCAN: statcan.fetch,
 }
+
+FETCH_ATTEMPTS = 3
+
+
+def _is_transient(exc: Exception) -> bool:
+    if isinstance(exc, httpx.TransportError | ssl.SSLError):
+        return True
+    if isinstance(exc, httpx.HTTPStatusError):
+        code = exc.response.status_code
+        return code >= 500 or code == 429
+    return False
+
+
+def _fetch_with_retry(
+    fetch: Fetcher,
+    s: SeriesDef,
+    client: httpx.Client,
+    since: date | None,
+    sleep: Callable[[float], None],
+) -> list[Observation]:
+    """Retry transient failures with exponential backoff. Other errors surface immediately."""
+    for attempt in range(FETCH_ATTEMPTS):
+        try:
+            return fetch(s, client, since)
+        except Exception as exc:
+            if not _is_transient(exc) or attempt == FETCH_ATTEMPTS - 1:
+                raise
+            log.info("transient error for %s, retrying: %s", s.id, redact(str(exc)))
+            sleep(2**attempt)
+    raise AssertionError("unreachable")
+
 
 # Re-fetch a window before the last stored observation so late revisions are picked up.
 REVISION_LOOKBACK = timedelta(days=45)
@@ -32,6 +66,7 @@ def sync(
     *,
     full: bool = False,
     fetchers: dict[Source, Fetcher] | None = None,
+    sleep: Callable[[float], None] = time.sleep,
 ) -> dict[str, str]:
     """Fetch and upsert each series. A failure on one series is logged and does not stop the rest.
 
@@ -50,7 +85,7 @@ def sync(
             last = db.last_obs_date(conn, s.id)
             since = last - REVISION_LOOKBACK if last else None
         try:
-            observations = fetch(s, client, since)
+            observations = _fetch_with_retry(fetch, s, client, since, sleep)
         except Exception as exc:  # one bad series must not abort the run
             message = redact(str(exc))
             log.warning("fetch failed for %s: %s", s.id, message)

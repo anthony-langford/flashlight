@@ -1,0 +1,20 @@
+id: statcan.toronto.permits_residential_value
+title: Toronto building permits, residential value (seasonally adjusted, current dollars)
+source: statcan
+source_id: '1675119950'
+source_ref: Table 34-10-0292-01, coordinate 45.4.1.1.2.0.0.0.0.0 (Toronto, Ontario;Total residential;Types
+  of work, total;Value of permits;Seasonally adjusted, current)
+frequency: monthly
+unit: thousands of dollars
+geography: Toronto CMA
+layer: supply
+seasonal_adj: true
+explainer:
+  what: The total value of residential building permits issued in Toronto in the month, in thousands of
+    dollars.
+  why_it_matters: Shows the scale of planned residential construction, including renovation work.
+  how_to_read: Includes alterations and improvements, not just new homes. Noisy, so use an average.
+  moves_with:
+  - statcan.toronto.permits_residential_units_created
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

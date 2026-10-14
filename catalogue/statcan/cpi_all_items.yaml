@@ -1,0 +1,19 @@
+id: statcan.toronto.cpi_all_items
+title: Toronto consumer price index, all items
+source: statcan
+source_id: '41692888'
+source_ref: Table 18-10-0004-01, coordinate 16.2.0.0.0.0.0.0.0.0 (Toronto, Ontario;All-items)
+frequency: monthly
+unit: index (2002=100)
+geography: Toronto CMA
+layer: canada_macro
+explainer:
+  what: The price level of a basket of everyday goods and services in Toronto. An index level, not an
+    inflation rate.
+  why_it_matters: Local inflation affects the cost of living and the budget left for a mortgage.
+  how_to_read: Compute the year-over-year change from the index. The app should derive it.
+  moves_with:
+  - statcan.toronto.cpi_shelter
+  - boc.cpi_trim
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

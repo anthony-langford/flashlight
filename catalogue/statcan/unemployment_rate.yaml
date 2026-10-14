@@ -1,0 +1,23 @@
+id: statcan.toronto.unemployment_rate
+title: Toronto unemployment rate (three-month moving average, seasonally adjusted)
+source: statcan
+source_id: '1643279334'
+source_ref: Table 14-10-0459-01, coordinate 26.5.1.1.0.0.0.0.0.0 (Toronto, Ontario;Unemployment rate;Estimate;Seasonally
+  adjusted)
+frequency: monthly
+unit: percent
+geography: Toronto CMA
+layer: demand
+seasonal_adj: true
+explainer:
+  what: The share of Toronto-area labour force looking for work without finding it. This table is a three-month
+    moving average, so it is smoother and slower to turn than the raw monthly survey.
+  why_it_matters: Job security is the foundation of a mortgage. A rising local unemployment rate weakens
+    buyer confidence and demand.
+  how_to_read: Direction over several months matters more than the level. Sampling error is larger for
+    a single city than for Canada overall.
+  moves_with:
+  - statcan.toronto.employment_rate
+  - statcan.toronto.employment
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

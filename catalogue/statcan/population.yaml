@@ -1,0 +1,23 @@
+id: statcan.toronto.population
+title: Toronto CMA population estimate (July 1)
+source: statcan
+source_id: '1589887692'
+source_ref: Table 17-10-0148-01, coordinate 22.1.1.0.0.0.0.0.0.0 (Toronto (CMA), Ontario;Total - gender;All
+  ages)
+frequency: annual
+unit: persons
+geography: Toronto CMA
+layer: demand
+explainer:
+  what: Statistics Canada's estimate of the Toronto census metropolitan area population on July 1 each
+    year. The data tags it with the January date of that year.
+  why_it_matters: Population growth, especially from immigration and non-permanent residents, is a major
+    driver of housing demand and rents.
+  how_to_read: Look at the year-over-year change. The estimates for 2024 and 2025 were both about 7.11
+    million, a sharp slowdown after growth of about 270 thousand the year before (checked 2026-10-14).
+    Component data (immigration, non-permanent residents) for Toronto is not yet in this project.
+  moves_with:
+  - statcan.toronto.employment
+  - statcan.toronto.cpi_rented_accommodation
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

@@ -1,0 +1,20 @@
+id: statcan.toronto.cpi_rented_accommodation
+title: Toronto consumer price index, rented accommodation
+source: statcan
+source_id: '41692890'
+source_ref: Table 18-10-0004-01, coordinate 16.80.0.0.0.0.0.0.0.0 (Toronto, Ontario;Rented accommodation)
+frequency: monthly
+unit: index (2002=100)
+geography: Toronto CMA
+layer: rental
+explainer:
+  what: 'The price level of renting in Toronto: rent plus related items such as tenants'' insurance and
+    maintenance. Finer rent-only series are not published for Toronto.'
+  why_it_matters: A proxy for rent growth. It feeds the rent versus buy comparison.
+  how_to_read: Compute the year-over-year change. It reflects rent paid by existing tenants, which moves
+    more slowly than asking rents.
+  moves_with:
+  - statcan.toronto.cpi_shelter
+  - statcan.toronto.cpi_owned_accommodation
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

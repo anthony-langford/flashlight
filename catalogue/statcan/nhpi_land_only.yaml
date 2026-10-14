@@ -1,0 +1,19 @@
+id: statcan.toronto.nhpi_land_only
+title: Toronto new housing price index, land only
+source: statcan
+source_id: '111955501'
+source_ref: Table 18-10-0205-01, coordinate 20.3.0.0.0.0.0.0.0.0 (Toronto, Ontario;Land only)
+frequency: monthly
+unit: index (2016-12=100)
+geography: Toronto CMA
+layer: toronto_market
+explainer:
+  what: The price index for the land component of new homes in Toronto.
+  why_it_matters: Land is scarce in Toronto, so land prices drive much of the long-run price growth.
+  how_to_read: Some recent values are flagged as lower quality by Statistics Canada. Treat month-to-month
+    moves with caution.
+  moves_with:
+  - statcan.toronto.nhpi_total
+  - statcan.toronto.nhpi_house_only
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

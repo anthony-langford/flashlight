@@ -1,0 +1,20 @@
+id: statcan.toronto.housing_under_construction_total
+title: Toronto housing under construction, all unit types (CMHC)
+source: statcan
+source_id: '42127480'
+source_ref: Table 34-10-0154-01, coordinate 23.2.1.0.0.0.0.0.0.0 (Toronto, Ontario;Housing under construction;Total
+  units)
+frequency: monthly
+unit: units
+geography: Toronto CMA
+layer: supply
+explainer:
+  what: The number of homes in the Toronto area that have been started but not yet completed.
+  why_it_matters: It is the pipeline of future supply. A large pipeline means a lot of completions are
+    coming over the next few years.
+  how_to_read: Compare it with completions to estimate how fast the pipeline is clearing.
+  moves_with:
+  - statcan.toronto.housing_starts_total
+  - statcan.toronto.housing_completions_total
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

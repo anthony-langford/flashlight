@@ -1,0 +1,20 @@
+id: statcan.toronto.employment
+title: Toronto employment (three-month moving average, seasonally adjusted)
+source: statcan
+source_id: '1643279318'
+source_ref: Table 14-10-0459-01, coordinate 26.3.1.1.0.0.0.0.0.0 (Toronto, Ontario;Employment;Estimate;Seasonally
+  adjusted)
+frequency: monthly
+unit: thousands of persons
+geography: Toronto CMA
+layer: demand
+seasonal_adj: true
+explainer:
+  what: The number of employed people in the Toronto area, in thousands.
+  why_it_matters: Employment growth means more households able to qualify for and afford housing.
+  how_to_read: Look at the change over 6 to 12 months, compared with population growth.
+  moves_with:
+  - statcan.toronto.unemployment_rate
+  - statcan.toronto.population
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

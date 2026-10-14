@@ -1,0 +1,22 @@
+id: statcan.toronto.employment_rate
+title: Toronto employment rate (three-month moving average, seasonally adjusted)
+source: statcan
+source_id: '1643279350'
+source_ref: Table 14-10-0459-01, coordinate 26.7.1.1.0.0.0.0.0.0 (Toronto, Ontario;Employment rate;Estimate;Seasonally
+  adjusted)
+frequency: monthly
+unit: percent
+geography: Toronto CMA
+layer: demand
+seasonal_adj: true
+explainer:
+  what: The share of the working-age population in Toronto that has a job.
+  why_it_matters: It captures job availability better than the unemployment rate because it is not affected
+    by people leaving the labour force.
+  how_to_read: Compare with its own history. Falling employment rate with a flat unemployment rate suggests
+    discouraged workers.
+  moves_with:
+  - statcan.toronto.unemployment_rate
+  - statcan.toronto.participation_rate
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

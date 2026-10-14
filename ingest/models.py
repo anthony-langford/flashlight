@@ -50,6 +50,7 @@ class SeriesDef(BaseModel):
     title: str
     source: Source
     source_id: str
+    source_ref: str | None = None  # human-readable pointer, e.g. table and coordinate
     frequency: Frequency
     unit: str
     geography: str

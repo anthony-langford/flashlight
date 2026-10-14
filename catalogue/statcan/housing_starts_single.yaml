@@ -1,0 +1,20 @@
+id: statcan.toronto.housing_starts_single
+title: Toronto housing starts, single-detached (CMHC)
+source: statcan
+source_id: '42127476'
+source_ref: Table 34-10-0154-01, coordinate 23.1.2.0.0.0.0.0.0.0 (Toronto, Ontario;Housing starts;Single-detached
+  units)
+frequency: monthly
+unit: units
+geography: Toronto CMA
+layer: supply
+explainer:
+  what: New single-detached homes started in the Toronto area.
+  why_it_matters: This is new supply in one of your target property types. The numbers are small relative
+    to total starts.
+  how_to_read: Small numbers are noisy. Use a 12-month total.
+  moves_with:
+  - statcan.toronto.housing_starts_total
+  - statcan.toronto.housing_starts_semi
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'

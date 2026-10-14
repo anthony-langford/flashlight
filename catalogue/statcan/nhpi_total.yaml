@@ -1,0 +1,21 @@
+id: statcan.toronto.nhpi_total
+title: Toronto new housing price index, total (house and land)
+source: statcan
+source_id: '111955499'
+source_ref: Table 18-10-0205-01, coordinate 20.1.0.0.0.0.0.0.0.0 (Toronto, Ontario;Total (house and land))
+frequency: monthly
+unit: index (2016-12=100)
+geography: Toronto CMA
+layer: toronto_market
+explainer:
+  what: A price index for new homes in the Toronto area, tracking the same type of home over time so it
+    is not distorted by changing mixes. Builders report prices.
+  why_it_matters: It is a steady read on new-build prices. It excludes resale homes, which dominate the
+    market, so it shows only part of the picture.
+  how_to_read: Compute the year-over-year change. Compare with the resale benchmark price once TRREB data
+    is added.
+  moves_with:
+  - statcan.toronto.nhpi_house_only
+  - statcan.toronto.nhpi_land_only
+licence_note: Statistics Canada open licence terms not yet reviewed for hosting (https://www.statcan.gc.ca/en/reference/licence).
+verified_on: '2026-10-14'
