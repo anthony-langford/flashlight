@@ -3,7 +3,12 @@ import { esc, fmtDate } from "../format";
 import type { Tokens } from "../theme";
 import { Chart } from "./Chart";
 
-export type TrendLine = { name: string; color: "series1" | "series2"; pts: [string, number][] };
+export type TrendLine = {
+  name: string;
+  color: "series1" | "series2";
+  /** A null value is a gap: the line breaks there instead of joining across it. */
+  pts: [string, number | null][];
+};
 export type TrendPanelData = {
   id: string;
   title: string;
@@ -79,13 +84,14 @@ function TrendPanel({ panel, config, t }: { panel: TrendPanelData; config: Trend
   const option = useMemo(() => {
     // When the lines end close together their end labels would overlap, so only the first keeps
     // one. The legend and the tooltip still give both values.
-    const ends = panel.lines.map((l) => l.pts[l.pts.length - 1]?.[1]);
+    const lastPoint = (l: TrendLine) => [...l.pts].reverse().find((p) => p[1] !== null) as [string, number] | undefined;
+    const ends = panel.lines.map((l) => lastPoint(l)?.[1]);
     const span = config.range.max - config.range.min || 1;
     const labelEnd = (i: number) =>
       i === 0 || ends.slice(0, i).every((e) => e === undefined || ends[i] === undefined || Math.abs((e as number) - (ends[i] as number)) / span > LABEL_GAP);
     const line = (l: TrendLine, first: boolean, index: number) => {
       const color = t[l.color];
-      const last = l.pts[l.pts.length - 1];
+      const last = lastPoint(l);
       return {
         type: "line",
         name: l.name,
@@ -139,11 +145,11 @@ function TrendPanel({ panel, config, t }: { panel: TrendPanelData; config: Trend
         textStyle: { color: t.ink },
         axisPointer: { type: "line", lineStyle: { color: t.baseline, width: 1 } },
         formatter: (p: unknown) => {
-          const items = (Array.isArray(p) ? p : [p]) as {
-            value: [string, number];
+          const items = ((Array.isArray(p) ? p : [p]) as {
+            value: [string, number | null];
             seriesName: string;
             color: string;
-          }[];
+          }[]).filter((i) => i.value[1] !== null);
           if (items.length === 0) return "";
           const date = String(items[0].value[0]).slice(0, 10);
           const rows = items
@@ -151,7 +157,7 @@ function TrendPanel({ panel, config, t }: { panel: TrendPanelData; config: Trend
               (i) =>
                 `<div style="display:flex;align-items:center;gap:6px;margin-top:2px">` +
                 `<span style="width:12px;height:2px;background:${i.color};display:inline-block"></span>` +
-                `<span style="font-weight:600;color:${t.ink}">${esc(config.format(i.value[1]))}</span>` +
+                `<span style="font-weight:600;color:${t.ink}">${esc(config.format(i.value[1] as number))}</span>` +
                 `<span style="color:${t.ink2};font-size:12px">${esc(i.seriesName)}</span></div>`,
             )
             .join("");

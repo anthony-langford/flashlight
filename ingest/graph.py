@@ -26,6 +26,9 @@ MIN_OVERLAP_MONTHS = 60
 PRELIMINARY_MIN_MONTHS = 24
 PRELIMINARY_MAX_LAG = 3
 MIN_ABS_CORR = 0.15
+# A correlation of this many standard errors (about 95% confidence for 2) is the least that can
+# be told apart from zero. It rises as the history gets shorter.
+SIGNIFICANCE_Z = 2.0
 
 
 class Confidence(StrEnum):
@@ -177,6 +180,11 @@ def lagged_corr(x: dict[int, float], y: dict[int, float], lag: int) -> tuple[flo
     return r, len(pairs)
 
 
+def significance_floor(pairs: int) -> float:
+    """Smallest |correlation| worth reporting for this many month pairs."""
+    return max(MIN_ABS_CORR, SIGNIFICANCE_Z / math.sqrt(max(pairs, 1)))
+
+
 def edge_evidence(
     x_obs: list[tuple[date, float]],
     x_unit: str,
@@ -208,7 +216,8 @@ def edge_evidence(
         return {"status": "insufficient", "overlap_months": overlap}
     r, lag, n = best
     r0, _ = lagged_corr(x, y, 0)
-    if abs(r) < MIN_ABS_CORR:
+    floor = significance_floor(n)
+    if abs(r) < floor:
         status = "weak"
     elif (r > 0) == (sign == "+"):
         status = "consistent"
@@ -220,6 +229,7 @@ def edge_evidence(
         "best_lag_months": lag,
         "searched_lags": max_lag,
         "best_corr": round(r, 3),
+        "significance_floor": round(floor, 3),
         "corr_at_zero": None if r0 is None else round(r0, 3),
         "pairs": n,
         "overlap_months": overlap,

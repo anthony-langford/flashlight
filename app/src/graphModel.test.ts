@@ -115,7 +115,13 @@ describe("evidence text", () => {
     const g = e({ status: "consistent", preliminary: true, best_lag_months: 2, searched_lags: 3, best_corr: -0.3, pairs: 28, overlap_months: 31 });
     expect(evidenceLabel(g)).toBe("Consistent with the claim (preliminary)");
     expect(evidenceDetail(g)).toMatch(/Preliminary: only 31 months/);
+    expect(evidenceDetail(g)).toMatch(/not seasonally adjusted/);
     expect(evidenceDetail(g)).toMatch(/lags 0 to 3/);
+  });
+  it("states the chance floor when one is given", () => {
+    const g = e({ status: "weak", preliminary: true, best_lag_months: 0, searched_lags: 3, best_corr: -0.25, significance_floor: 0.37, pairs: 32, overlap_months: 32 });
+    expect(evidenceLabel(g)).toBe("No clear relationship in the data (preliminary)");
+    expect(evidenceDetail(g)).toMatch(/about 0.37/);
   });
   it("does not add the preliminary note to a full result", () => {
     const g = e({ status: "consistent", preliminary: false, best_lag_months: 0, best_corr: 0.79, pairs: 309, overlap_months: 309 });

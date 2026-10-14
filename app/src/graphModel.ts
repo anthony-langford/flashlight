@@ -126,7 +126,7 @@ export function nodeReadout(node: GraphNode, data: AppData): Readout | null {
 
 export const EVIDENCE_TEXT: Record<GraphEdge["evidence"]["status"], string> = {
   consistent: "Consistent with the claim",
-  weak: "Weak relationship in the data",
+  weak: "No clear relationship in the data",
   opposite: "Data point the other way",
   insufficient: "Not enough history to check",
   no_series: "No long data series to check",
@@ -137,10 +137,14 @@ export function evidenceDetail(e: GraphEdge): string {
   if ((ev.status === "consistent" || ev.status === "weak" || ev.status === "opposite") && ev.best_corr !== undefined) {
     const lag = ev.best_lag_months === 0 ? "the same month" : `${ev.best_lag_months} month${ev.best_lag_months === 1 ? "" : "s"} later`;
     const searched = ev.searched_lags ?? e.max_lag_months;
+    const floor =
+      ev.significance_floor !== undefined
+        ? ` A correlation has to reach about ${ev.significance_floor.toFixed(2)} at this length of history to be told apart from chance.`
+        : "";
     const prelim = ev.preliminary
-      ? ` Preliminary: only ${ev.overlap_months} months of history so far, so only lags up to ${searched} months were tried and the result could easily change.`
+      ? ` Preliminary: only ${ev.overlap_months} months of history so far, so only lags up to ${searched} months were tried. These monthly series are not seasonally adjusted, so a shared seasonal cycle can look like a link.`
       : "";
-    return `Strongest link in monthly changes: correlation ${ev.best_corr.toFixed(2)}, ${lag} (${ev.pairs} months compared, best of lags 0 to ${searched}).${prelim}`;
+    return `Strongest link in monthly changes: correlation ${ev.best_corr.toFixed(2)}, ${lag} (${ev.pairs} months compared, best of lags 0 to ${searched}).${floor}${prelim}`;
   }
   if (ev.status === "insufficient") {
     return `Only ${ev.overlap_months ?? 0} months of overlapping monthly data. At least 24 are needed for a preliminary check and 60 for a full one, so no number is shown.`;

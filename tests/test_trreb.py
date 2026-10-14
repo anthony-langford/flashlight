@@ -320,3 +320,18 @@ def test_old_layout_keeps_only_the_sales_count_for_a_zero_sales_row():
 def test_old_layout_ignores_pages_without_a_title():
     page = '<page width="9" height="9">' + _word(10, 10, "Hello") + "</page>"
     assert trreb.parse_old_layout("<doc>" + page + "</doc>") == []
+
+
+def test_old_layout_drops_a_district_row_identical_to_the_row_above():
+    # If W02's own cells were absent, W01's surviving copies could pass the checks as W02.
+    twin = [*ROWS[:3], (["Toronto", "W02"], list(ROWS[2][1]))]
+    got = _old(twin)
+    assert "Toronto W01" in got
+    assert "Toronto W02" not in got
+
+
+def test_old_layout_keeps_identical_rows_that_are_not_toronto_districts():
+    # Orangeville and Dufferin County really are identical rows in TRREB's report
+    rows = [*ROWS[:2], (["Dufferin", "County"], ROWS[1][1]), (["Orangeville"], ROWS[1][1])]
+    got = _old(rows)
+    assert "Orangeville" in got

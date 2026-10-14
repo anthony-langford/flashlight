@@ -24,21 +24,23 @@ For each edge where both ends have a data series, the export computes, on **mont
 1. Resample each series to months, keeping the last reading in each month.
 2. Correlate the source's change in month t with the target's change in month t + lag, for lags 0 to `max_lag_months` (the source leads).
 3. Keep the lag with the strongest correlation, and label the edge:
-   - `consistent`: |r| of at least 0.15 and the sign matches the claim.
-   - `weak`: |r| below 0.15.
-   - `opposite`: |r| of at least 0.15 but the sign is the other way.
+   - `consistent`: |r| clears the significance floor and the sign matches the claim.
+   - `weak`: |r| is below the floor, so it cannot be told apart from chance.
+   - `opposite`: |r| clears the floor but the sign is the other way.
+
+   The floor is the larger of 0.15 and 2 / sqrt(pairs), which is about 0.19 for 117 months of history, 0.37 for 30 months. A short history throws up sizeable correlations by chance, so the same number means less with 30 months than with 300.
    - `insufficient`: fewer than 24 overlapping months (annual series always land here).
    - `no_series`: one end is a concept with no data.
 
    With 60 or more overlapping months the full lag search runs. With 24 to 59 months the result is marked **preliminary** and only lags up to 3 months are tried, because many lags on a short history mostly find noise. TRREB nodes (history from January 2024, about 30 months of changes) are in this tier.
 
-Searching several lags and keeping the best flatters the result a little, so read "consistent" as "does not contradict", not as strong support. Results as of 2026-10-14 (19 edges), recompute with `uv run python -m ingest export`:
+Searching several lags and keeping the best flatters the result a little, so read "consistent" as "does not contradict", not as strong support. Several of these series are also not seasonally adjusted, so a shared seasonal cycle can look like a link. Results as of 2026-10-14 (19 edges), recompute with `uv run python -m ingest export`:
 
-- Full history, consistent: US 10-year to GoC 5-year yield (r 0.79), policy rate to prime (0.89), prime to variable mortgage (0.84), GoC 5-year to posted fixed rate (0.36), Fed rate to US 10-year (0.18), policy rate to 5-year yield (0.18), core inflation to policy rate (0.22 at 9 months), oil to USD/CAD (-0.29).
-- Preliminary, consistent: months of inventory to prices (-0.30, two months later).
-- Preliminary, weak: sales to months of inventory, housing starts to months of inventory.
-- Preliminary, **opposite**: rents to sales (-0.25). The claim was "same direction" and marked debated. The data lean the other way, so this edge deserves your review.
-- Not checkable: new listings to inventory and prices to new listings (the new-listings series is patchy in the older reports), population to rents (annual), and the four edges through the concept node buyer payment capacity.
+- Full history, consistent: US 10-year to GoC 5-year yield (r 0.79), policy rate to prime (0.89), prime to variable mortgage (0.84), GoC 5-year to posted fixed rate (0.36), core inflation to policy rate (0.22 at 9 months), oil to USD/CAD (-0.29), and two weak but above-floor links: Fed rate to US 10-year (0.18) and policy rate to 5-year yield (0.18).
+- Preliminary (about 30 months, TRREB history from January 2024): all six edges that touch the Toronto market series read **no clear relationship**: sales to inventory, new listings to inventory, housing starts to inventory, months of inventory to prices, prices to new listings and rents to sales. None clears the floor of about 0.35 to 0.38, so the data neither support nor contradict those claims yet. In particular the rents-to-sales edge, marked debated, is not contradicted: an earlier version of this check reported it as pointing the other way, which was noise.
+- Not checkable: population to rents (annual data) and the four edges through the concept node buyer payment capacity.
+
+With more months the preliminary edges will become checkable. Do not read any housing-chain edge as supported or contradicted by the data yet.
 
 ## How the app uses it
 
@@ -49,7 +51,7 @@ Searching several lags and keeping the best flatters the result a little, so rea
 
 ## Reviewing the edges (owner task)
 
-For each edge in `graph/edges.yaml`, read the rationale and confidence. Change anything you disagree with, then set `review: reviewed`. Pay most attention to the `debated` edge (`rents` to `sales`, which the preliminary data contradict) and to the `plausible` ones. Weak points I already know about:
+For each edge in `graph/edges.yaml`, read the rationale and confidence. Change anything you disagree with, then set `review: reviewed`. Pay most attention to the `debated` edge (`rents` to `sales`) and to the `plausible` ones. The data cannot help with them yet. Weak points I already know about:
 
 - `starts` to `inventory_months` uses CMHC starts for all unit types, mostly apartments, so it says little about freehold supply.
 - `unemployment` to `buyer_payment_capacity` is a concept link with no data check.

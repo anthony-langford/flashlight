@@ -35,8 +35,9 @@ export function HpiTrend({ hpi, districts, labels, budget, tokens }: Props) {
       districts.map((d) => {
         const detached = series(hpi, d, "sf_detached");
         const attached = series(hpi, d, "sf_attached");
-        const first = detached[0];
-        const last = detached[detached.length - 1];
+        const latest = hpi
+          .filter((r) => r.area === `Toronto ${d}` && r.home_type === "sf_detached" && r.yoy_pct !== null)
+          .sort((a, b) => b.period.localeCompare(a.period))[0];
         return {
           id: d,
           title: d,
@@ -45,16 +46,17 @@ export function HpiTrend({ hpi, districts, labels, budget, tokens }: Props) {
             { name: "Detached", color: "series1" as const, pts: detached },
             { name: "Attached", color: "series2" as const, pts: attached },
           ],
-          footer:
-            first && last
-              ? `Detached ${fmtSigned((last[1] / first[1] - 1) * 100, 1, "%")} since ${fmtDate(first[0], "monthly")}`
-              : undefined,
+          // TRREB's own year-over-year for the latest month, not a first-to-last comparison of
+          // two noisy monthly readings.
+          footer: latest
+            ? `Detached ${fmtSigned(latest.yoy_pct as number, 1, "%")} vs a year earlier (${fmtDate(latest.period, "monthly")}, TRREB)`
+            : undefined,
         };
       }),
     [hpi, districts, labels],
   );
   const range = useMemo(
-    () => sharedRange(panels.flatMap((p) => p.lines.flatMap((l) => l.pts.map((x) => x[1]))), budget),
+    () => sharedRange(panels.flatMap((p) => p.lines.flatMap((l) => l.pts.flatMap((x) => (x[1] === null ? [] : [x[1]])))), budget),
     [panels, budget],
   );
   const months = useMemo(() => [...new Set(hpi.map((r) => r.period))].sort(), [hpi]);

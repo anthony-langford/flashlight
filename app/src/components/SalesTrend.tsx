@@ -53,30 +53,33 @@ export function SalesTrend({ market, districts, labels, tokens }: Props) {
         const lines = TYPES.map((t) => ({
           name: t.name,
           color: t.color,
-          pts: market
-            .filter((r) => r.area === `Toronto ${d}` && r.home_type === t.key)
-            .filter((r) => (metric === "sales" ? r.sales !== null : (r.sales ?? 0) >= MIN_SALES_FOR_AVERAGES))
-            .sort((a, b) => a.period.localeCompare(b.period))
-            .flatMap((r) => (r[metric] === null ? [] : [[r.period, r[metric] as number] as [string, number]])),
+          // Every month appears. Months left out for too few sales are gaps, so the line breaks.
+          pts: months.map((m) => {
+            const r = market.find((x) => x.area === `Toronto ${d}` && x.home_type === t.key && x.period === m);
+            const enough = metric === "sales" ? r?.sales !== null : (r?.sales ?? 0) >= MIN_SALES_FOR_AVERAGES;
+            const v = r && enough ? r[metric] : null;
+            return [m, v ?? null] as [string, number | null];
+          }),
         }));
         // Say so when a line is mostly missing instead of silently leaving it out.
-        const thin = lines.filter((l) => l.pts.length < MIN_POINTS_TO_DRAW);
+        const count = (l: { pts: [string, number | null][] }) => l.pts.filter((p) => p[1] !== null).length;
+        const thin = lines.filter((l) => count(l) < MIN_POINTS_TO_DRAW);
         return {
           id: d,
           title: d,
           subtitle: labels[d] ?? "",
-          lines: lines.filter((l) => l.pts.length >= MIN_POINTS_TO_DRAW),
+          lines: lines.filter((l) => count(l) >= MIN_POINTS_TO_DRAW),
           footer:
             thin.length === 0
               ? undefined
               : `${thin.map((l) => l.name).join(" and ")}: too few months with ${MIN_SALES_FOR_AVERAGES} or more sales to chart.`,
         };
       }),
-    [market, districts, labels, metric],
+    [market, districts, labels, metric, months],
   );
 
   const config: TrendConfig = useMemo(() => {
-    const values = panels.flatMap((p) => p.lines.flatMap((l) => l.pts.map((x) => x[1])));
+    const values = panels.flatMap((p) => p.lines.flatMap((l) => l.pts.flatMap((x) => (x[1] === null ? [] : [x[1]]))));
     const range = niceRange(values, metric === "sp_lp" ? [100] : metric === "sales" ? [0] : []);
     const pct = metric === "sp_lp";
     return {
@@ -112,7 +115,7 @@ export function SalesTrend({ market, districts, labels, tokens }: Props) {
         <strong>{METRICS[metric].label}.</strong> {METRICS[metric].help}{" "}
         {metric === "sales"
           ? ""
-          : `Months with fewer than ${MIN_SALES_FOR_AVERAGES} sales are left out. `}
+          : `Months with fewer than ${MIN_SALES_FOR_AVERAGES} sales, or where the older report layout left the figure unclear, are left out and the line breaks. `}
         {fmtDate(months[0], "monthly")} to {fmtDate(months[months.length - 1], "monthly")}, TRREB
         Market Watch. Older months were recovered from earlier report layouts and every recovered row
         was checked arithmetically.
@@ -148,7 +151,7 @@ export function SalesTrend({ market, districts, labels, tokens }: Props) {
                   {panels.flatMap((p) =>
                     p.lines.map((l) => {
                       const v = l.pts.find((x) => x[0] === m)?.[1];
-                      return <td key={`${p.id}-${l.name}`} className="num">{v === undefined ? "–" : config.format(v)}</td>;
+                      return <td key={`${p.id}-${l.name}`} className="num">{v === undefined || v === null ? "–" : config.format(v)}</td>;
                     }),
                   )}
                 </tr>

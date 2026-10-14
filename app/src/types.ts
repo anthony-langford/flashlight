@@ -90,6 +90,7 @@ export type EdgeEvidence = {
   searched_lags?: number;
   best_lag_months?: number;
   best_corr?: number;
+  significance_floor?: number;
   corr_at_zero?: number | null;
   pairs?: number;
   overlap_months?: number;

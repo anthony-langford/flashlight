@@ -26,3 +26,12 @@ describe("niceRange", () => {
     expect(r.max).toBeGreaterThanOrEqual(42);
   });
 });
+
+import { LABEL_GAP } from "./TrendGrid";
+
+describe("LABEL_GAP", () => {
+  it("is a small share of the axis, so only genuinely close end labels are suppressed", () => {
+    expect(LABEL_GAP).toBeGreaterThan(0);
+    expect(LABEL_GAP).toBeLessThan(0.25);
+  });
+});

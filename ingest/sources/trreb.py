@@ -394,29 +394,32 @@ _KEY_FIELDS = {"sales", "dollar_volume", "avg_price"}
 
 def _row_values(
     own: list[tuple[float, str]], cols: list[tuple[float, str]]
-) -> tuple[dict[str, float | None], set[str]]:
-    """Map a row's numbers to columns. Returns (values, fields where two words competed)."""
+) -> tuple[dict[str, float | None], dict[str, list[tuple[float, str]]]]:
+    """Map a row's numbers to columns. Returns (values, the competing words for any column that
+    got two or more)."""
     values: dict[str, float | None] = {c: None for _, c in cols}
-    seen: set[str] = set()
-    conflicts: set[str] = set()
+    seen: dict[str, list[tuple[float, str]]] = {}
     for x, t in own:
         if not _NUMERIC.match(t):
             continue
         field = _column_for(x, cols)
         if field is None:
             continue
-        if field in seen:
-            conflicts.add(field)
-            values[field] = None
-            continue
-        seen.add(field)
-        values[field] = _num(t)
+        seen.setdefault(field, []).append((x, t))
+    conflicts: dict[str, list[tuple[float, str]]] = {}
+    for field, words in seen.items():
+        if len(words) == 1:
+            values[field] = _num(words[0][1])
+        else:
+            conflicts[field] = words
     return values, conflicts
 
 
-def _usable(values: dict[str, float | None], conflicts: set[str]) -> dict[str, float | None] | None:
+def _usable(
+    values: dict[str, float | None], conflicts: dict[str, list[tuple[float, str]]]
+) -> dict[str, float | None] | None:
     """Apply the checks. Competing words in a non-key column leave that column unknown."""
-    if conflicts & _KEY_FIELDS:
+    if conflicts.keys() & _KEY_FIELDS:
         return None
     if values.get("sales") == 0:
         # A zero-sales row has blank price cells, and any other word in the slot is likely a
@@ -433,14 +436,16 @@ def parse_old_layout(bbox_html: str) -> list[DistrictRow]:
         meta: tuple[str, date] | None = None
         cols: list[tuple[float, str]] | None = None
         previous: list[tuple[float, str]] = []
-        for slot in _page_slots(page):
+        last_key: tuple | None = None
+        slots = _page_slots(page)
+        for i, slot in enumerate(slots):
             text = " ".join(t for _, t in slot)
             m = _OLD_TITLE.search(text)
             if m:
                 ht = _HOME_TYPES_LOWER.get(m["type"].strip().lower())
                 month = MONTHS.get(m["month"])
                 meta = (ht, date(int(m["year"]), month, 1)) if ht and month else None
-                cols, previous = None, []
+                cols, previous, last_key = None, [], None
                 continue
             if meta is None:
                 continue
@@ -458,25 +463,55 @@ def parse_old_layout(bbox_html: str) -> list[DistrictRow]:
             if not name or not any(_NUMERIC.match(t) for _, t in own):
                 previous = previous_row
                 continue
-            raw, conflicts = _row_values(own, cols)
-            values = _usable(raw, conflicts)
+            raw, competing = _row_values(own, cols)
+            values = _usable(raw, competing)
             # A numeric value equal to the previous row's may have been collapsed away. Rows with
             # sales have every cell filled, so restore gaps there too.
             if values is None or values.get("sales", 0) > 0:
                 retry = _fill_collapsed(own, removed, at_or_above=name_limit)
-                raw2, conflicts2 = _row_values(retry, cols)
-                retry_values = _usable(raw2, conflicts2)
+                raw2, competing2 = _row_values(retry, cols)
+                retry_values = _usable(raw2, competing2)
                 if retry_values is not None:
-                    values, own = retry_values, retry
+                    values, own, competing = retry_values, retry, competing2
             previous = list(own)
+            if values is not None and values.get("sales"):
+                next_slot = slots[i + 1] if i + 1 < len(slots) else []
+                _resolve_from_next_slot(values, competing, next_slot)
             if values is None:
                 dropped += 1
                 log.debug("dropped %s (%s, %s)", name, meta[0], meta[1])
                 continue
+            # If a row's own key cells were absent, the previous row's copies could survive removal
+            # and pass every check under this row's name. Neighbouring Toronto districts essentially
+            # never match on sales, dollar volume and average price all at once.
+            key = (values.get("sales"), values.get("dollar_volume"), values.get("avg_price"))
+            if name.startswith("Toronto ") and values.get("sales") and key == last_key:
+                dropped += 1
+                log.debug("dropped %s (%s): identical to the row above", name, meta[0])
+                continue
+            last_key = key
             out.append(DistrictRow(meta[1], name, meta[0], values))
     if dropped:
         log.warning("%d old-layout rows failed the consistency checks and were dropped", dropped)
     return out
+
+
+def _resolve_from_next_slot(
+    values: dict[str, float | None],
+    conflicts: dict[str, list[tuple[float, str]]],
+    next_slot: list[tuple[float, str]],
+) -> None:
+    """Settle a competing pair of words using the next row's slot.
+
+    A row's real word is repeated in the next slot, but the stale copy of the previous row is not,
+    so if exactly one candidate reappears there it is the row's own. Anything else stays unknown.
+    """
+    for field, words in conflicts.items():
+        if field in _KEY_FIELDS or values.get(field) is not None:
+            continue
+        again = [w for w in words if any(t == w[1] and abs(x - w[0]) < 0.6 for x, t in next_slot)]
+        if len(again) == 1:
+            values[field] = _num(again[0][1])
 
 
 def _row_is_consistent(v: dict[str, float | None]) -> bool:

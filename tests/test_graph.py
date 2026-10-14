@@ -226,3 +226,20 @@ def test_payload_uses_trreb_series_for_trreb_nodes(tmp_path):
     ev = payload["edges"][0]["evidence"]
     assert ev["preliminary"] is True and ev["status"] == "consistent"
     assert ev["best_corr"] < -0.5
+
+
+def test_significance_floor_rises_as_history_shortens():
+    assert g.significance_floor(28) == pytest.approx(0.378, abs=0.001)
+    assert g.significance_floor(117) == pytest.approx(0.185, abs=0.001)
+    assert g.significance_floor(300) == g.MIN_ABS_CORR  # long histories fall back to the 0.15 floor
+
+
+def test_a_correlation_that_short_histories_produce_by_chance_is_not_reported_as_a_finding():
+    # Two unrelated random walks that happen to correlate at 0.29 over 39 months. That clears the
+    # old 0.15 cutoff but not the floor of about 0.32 for this much history.
+    a, b = _series(1, months=40), _series(102, months=40)
+    ev = g.edge_evidence(a, "percent", b, "percent", "+", max_lag=3)
+    assert ev["preliminary"] is True
+    assert abs(ev["best_corr"]) > g.MIN_ABS_CORR
+    assert abs(ev["best_corr"]) < ev["significance_floor"]
+    assert ev["status"] == "weak"
