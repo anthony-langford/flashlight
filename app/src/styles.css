@@ -417,3 +417,85 @@ footer {
     max-height: 260px;
   }
 }
+
+/* Affordability */
+.afford {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) 1fr;
+  gap: 24px;
+  align-items: start;
+  margin: 16px 0 8px;
+}
+.afford-inputs {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.field-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+input[type="number"] {
+  font: inherit;
+  width: 100%;
+  background: var(--page);
+  color: var(--ink);
+  border: 1px solid var(--baseline);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-variant-numeric: tabular-nums;
+}
+input[type="number"]:focus-visible,
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--series1);
+  outline-offset: 2px;
+}
+.field select {
+  width: 100%;
+}
+.check {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 13px;
+}
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.notice {
+  border: 1px solid var(--baseline);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin: 12px 0;
+  font-size: 13px;
+  background: var(--surface);
+}
+.notice ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+.notice.blocker {
+  border-color: var(--ink);
+}
+@media (max-width: 860px) {
+  .afford {
+    grid-template-columns: 1fr;
+  }
+}
+.row-yours th,
+.row-yours td {
+  background: var(--wash);
+}

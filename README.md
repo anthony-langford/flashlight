@@ -8,7 +8,7 @@ Flashlight pulls public economic and housing data, explains each indicator in pl
 
 ## Status
 
-Last updated: 2026-10-14. Phase: M1 (data foundation) and M2 (export and first UI) done. M3 (causal map) is next.
+Last updated: 2026-10-14. Phase: M1 (data), M2 (export and first UI) and the M4 calculator done. M3 (causal map) is next.
 
 - [x] Idea explored, market scanned, scope agreed ([docs/PROJECT.md](docs/PROJECT.md))
 - [x] Data source feasibility checked ([docs/DATA_SOURCES.md](docs/DATA_SOURCES.md))
@@ -25,7 +25,7 @@ Last updated: 2026-10-14. Phase: M1 (data foundation) and M2 (export and first U
 - [x] Export step: `uv run python -m ingest export` writes catalogue summaries (latest value, 1-year change, year-over-year for index series, percentile, staleness), per-series JSON and TRREB tables to `app/public/data/` (gitignored). Buyer profile in `config/buyer.yaml`
 - [x] React app (Vite, TypeScript, ECharts) with two views: Overview (market snapshot tiles, target-district HPI benchmark chart against your budget band, district sales table) and Indicators (all 42 series with range filter, year-over-year toggle for index series, table view, percentile meter, draft explainers, source and licence). Light and dark themes, colors validated. Linkable via `#/indicators/<series id>`. 12 unit tests
 - [ ] Causal map (M3), owner review of drafted explainers and edges
-- [ ] Mortgage calculator (M4), blocked on verifying the rules listed below
+- [x] Mortgage rules verified from official pages (docs/MORTGAGE_RULES.md) and Affordability tab built: monthly payment, stress-test payment, cash needed at closing with land transfer taxes and rebates, sensitivity grid across your budget and rates, scenarios presettable from the URL. 16 tests against independently computed values
 
 ## Buyer profile (drives priorities)
 
@@ -41,14 +41,14 @@ Stated by the owner on 2026-10-14.
 
 1. TRREB: find a way to recover history before Sept 2026 (older PDF layout). Until then history builds month by month.
 2. Causal map: nodes and edges from `graph/`, React Flow view, node state colouring (M3). Needs owner review of the draft edges in docs/CAUSAL_MAP.md.
-3. Verify the mortgage and tax rules listed below against official sources, then build the payment calculator (M4).
+3. Ask the owner: first-time buyer? Which rate to assume? Then refine the calculator defaults.
 
 ## Milestones
 
 - **M1 Data foundation:** ingestion, catalogue, DuckDB, tests (current)
 - **M2 Export and first UI:** done. See Status
 - **M3 Causal map:** React Flow view, owner review of draft edges, lead/lag evidence ([docs/CAUSAL_MAP.md](docs/CAUSAL_MAP.md))
-- **M4 Housing tools:** mortgage calculator on live rates, Toronto overview, release calendar, land transfer tax and closing costs
+- **M4 Housing tools:** payment calculator and closing costs (done), release calendar (open)
 - **M5 Discovery and polish:** LLM-assisted series suggestions checked against real series, weekly digest, hosting and licence review
 
 ## Backlog
@@ -63,14 +63,17 @@ Stated by the owner on 2026-10-14.
 - How to recover TRREB history before Sept 2026 (older PDF layout has duplicated text layers).
 - Which school-quality source, if any, is acceptable to use.
 
-## Must verify before building the mortgage calculator
+## Mortgage rules
 
-None of these are stated from memory in the docs. Verify each against an official source and record the date.
+Verified from official pages on 2026-10-14 and written up with sources, dates and confidence in [docs/MORTGAGE_RULES.md](docs/MORTGAGE_RULES.md): stress test, down payment tiers, insured price cap, CMHC premiums, Ontario and Toronto land transfer tax, first-time buyer rebates, sales tax on the premium. The calculator uses exactly those numbers.
 
-- Mortgage stress test (minimum qualifying rate) rule
-- Insured mortgage price cap and minimum down payment tiers. A $1.10M to $1.35M budget sits near these thresholds and the rules have changed recently.
-- Toronto land transfer tax (provincial and municipal) and any first-time-buyer rebates
-- Maximum amortization rules for insured and uninsured mortgages
+Still open:
+
+- **Insured price cap conflict.** Finance Canada says $1.5 million (since Dec 15, 2024). One FCAC page still says insurance is unavailable at $1 million or more. The calculator assumes $1.5 million and warns. Confirm with a lender before planning on less than 20% down.
+- Toronto's first-time buyer rebate ($4,475) was last confirmed on a page dated Dec 2025 and Council was asked to review it.
+- 8% sales tax on mortgage insurance premiums is read from Ontario's general insurance page, not a page naming mortgage insurance.
+- Maximum amortization for uninsured mortgages (lender-set) and compounding convention are unverified assumptions.
+- Whether you count as a first-time buyer is yours to confirm. The calculator defaults to no.
 
 ## Open data items
 
@@ -140,3 +143,4 @@ Educational project. Nothing here is financial, mortgage or real estate advice.
 |---|---|
 | 2026-10-14 | Explored idea and market. Chose scope (Toronto housing, no China). Verified BoC, StatCan and FRED series and Toronto coverage. CMHC and TRREB are file-based only. Created repo and docs, pushed. Recorded buyer profile. Installed uv and Python 3.12. Made README the status source of truth. Built BoC, FRED and StatCan clients (38 series) and a TRREB PDF parser (Sept 2026 layout). Installed poppler. Added CMHC rent, JSON export and the React app (Overview and Indicators). |
 | 2026-10-14 | Review pass 1 (self-review of M1 and M2). Fixed: staleness now computed at view time, district table can no longer mix months, chart holds the previous render while loading, export has `--no-trreb` and the UI handles it. Read the StatCan, BoC and CMHC terms: CMHC is personal use only, BoC FX is LSEG-sourced. Added the review loop to AGENTS.md. |
+| 2026-10-14 | Verified mortgage and tax rules from official pages and found a conflict on the insured price cap ($1.5M per Finance Canada, $1M still on an FCAC page). Built the Affordability tab. Review of that step: caught a wrong hand-calculated tax example in the docs ($16,475 should be $20,475), hid the closing cost table when a purchase is blocked, added the entered price to the grid. |

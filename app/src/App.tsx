@@ -1,16 +1,26 @@
 import { useEffect, useState } from "react";
+import { AffordabilityPanel } from "./components/AffordabilityPanel";
 import { Overview } from "./components/Overview";
 import { SeriesExplorer } from "./components/SeriesExplorer";
 import { loadAll } from "./data";
 import { useTheme, type ThemeMode } from "./theme";
 import type { AppData } from "./types";
 
-type Tab = "overview" | "indicators";
+type Tab = "overview" | "indicators" | "affordability";
 
-/** `#/indicators/boc.gov_5y_yield` selects a tab and an indicator. */
-function parseHash(): { tab: Tab; id?: string } {
-  const [, tab, id] = window.location.hash.split("/");
-  return { tab: tab === "indicators" ? "indicators" : "overview", id: id ? decodeURIComponent(id) : undefined };
+/**
+ * `#/indicators/boc.gov_5y_yield` selects a tab and an indicator.
+ * `#/affordability?price=1200000&down=95000&rate=5&amort=30&ftb=1` presets a scenario.
+ */
+function parseHash(): { tab: Tab; id?: string; params: URLSearchParams } {
+  const [path, query = ""] = window.location.hash.replace(/^#/, "").split("?");
+  const [, tab, id] = path.split("/");
+  const known: Tab[] = ["overview", "indicators", "affordability"];
+  return {
+    tab: known.includes(tab as Tab) ? (tab as Tab) : "overview",
+    id: id ? decodeURIComponent(id) : undefined,
+    params: new URLSearchParams(query),
+  };
 }
 
 export default function App() {
@@ -40,7 +50,7 @@ export default function App() {
           <span className="muted">Toronto housing, explained</span>
         </div>
         <nav aria-label="Sections" className="tabs">
-          {(["overview", "indicators"] as const).map((t) => (
+          {(["overview", "indicators", "affordability"] as const).map((t) => (
             <button
               key={t}
               type="button"
@@ -50,7 +60,7 @@ export default function App() {
                 window.location.hash = `#/${t}`;
               }}
             >
-              {t === "overview" ? "Overview" : "Indicators"}
+              {t === "overview" ? "Overview" : t === "indicators" ? "Indicators" : "Affordability"}
             </button>
           ))}
         </nav>
@@ -68,6 +78,7 @@ export default function App() {
         {error && <p className="error">{error}</p>}
         {!data && !error && <p className="muted">Loading&hellip;</p>}
         {data && tab === "overview" && <Overview data={data} tokens={tokens} />}
+        {data && tab === "affordability" && <AffordabilityPanel data={data} params={route.params} />}
         {data && tab === "indicators" && (
           <SeriesExplorer
             key={route.id ?? "default"}
