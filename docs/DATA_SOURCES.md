@@ -156,13 +156,14 @@ What the map shows for the target areas:
 - **W07:** Stonegate-Queensway only. South of Bloor and Dundas, between Islington Ave and the Humber River, down to the Gardiner.
 - **W08:** Kingsway South (just north of Bloor), Edenbridge-Humber Valley, Princess-Rosethorn, Islington-City Centre West, Etobicoke West Mall, Markland Wood, Eringate-Centennial-West Deane.
 
-| Area you named | TRREB district(s) | Evidence |
+| Area | TRREB district(s) | Status |
 |---|---|---|
-| Riverdale | E01 | Official map and 2019 community reports. Confident. |
-| Monarch Park | E01, E02 or E03 depending on the street. Not a TRREB community. | The map gives the boundaries above. Which side of them a street falls on, and which streets are in the school's catchment, I have not verified. |
-| Sunnylea | W07 if south of Bloor, W08 (Kingsway South) if north of Bloor. Not a TRREB community. | The map gives the boundary. The location of Sunnylea relative to Bloor I have not verified. |
+| Riverdale | E01 | Official map and 2019 community reports. |
+| Monarch Park | E01, E02, E03 | Owner confirmed 2026-10-14: E01 and E02 fit, E03 can work but the school cutoffs sit close to Danforth Ave. |
+| Sunnylea | W07 | Owner confirmed. W08 (which holds Kingsway South, north of Bloor) is excluded. |
+| South Parkdale, Roncesvalles, High Park-Swansea | W01 | Added by the owner. Communities listed under W01 on the official map. |
 
-**How to confirm a street:** (1) open the map PDF and find the street. (2) Ask your realtor to look up an address on MLS. The listing shows the area code (for example "Toronto W07") and the community. (3) Check the school catchment for that address on the Toronto District School Board's school locator (tdsb.on.ca, not checked by me). Note the district for each catchment street, then tell me which districts to focus on.
+**How a street was checked, if you need to check another:** (1) open the map PDF and find the street. (2) Ask your realtor to look up an address on MLS. The listing shows the area code (for example "Toronto W07") and the community. (3) Check the school catchment for that address on the Toronto District School Board's school locator (tdsb.on.ca, not checked by me). Note the district for each catchment street, then tell me which districts to focus on.
 
 ## Known gaps and open items
 

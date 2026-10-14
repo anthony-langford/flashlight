@@ -11,29 +11,37 @@ first_time_buyer: true      # drives land transfer tax rebates and 30-year insur
 amortization_years: 30      # for an uninsured mortgage the lender sets the maximum, ask them
 
 # TRREB districts are the finest geography in the monthly Market Watch report.
-# `confidence` records how well the neighbourhood-to-district mapping is supported.
+# `confidence` records how well the neighbourhood-to-district mapping is supported (the owner
+# confirmed these choices on 2026-10-14).
 # See docs/DATA_SOURCES.md, "Target areas and TRREB districts".
 target_areas:
   - name: Riverdale
     side: east
     districts: [E01]
     confidence: confident
-    note: TRREB 2019 community reports list North Riverdale, South Riverdale, Blake-Jones and Greenwood-Coxwell under E01.
+    note: TRREB's 2019 community reports and official map list North Riverdale, South Riverdale, Blake-Jones and Greenwood-Coxwell under E01.
   - name: Monarch Park
     side: east
     districts: [E01, E02, E03]
-    confidence: unconfirmed
-    note: Not a TRREB community. TRREB's official map puts E03 north of Danforth Ave, E02 south of Danforth and east of Coxwell Ave, and E01 west of Coxwell. Which applies depends on the street, so check addresses against the TDSB catchment and the map.
+    confidence: confident
+    short_note: E01 and E02 fit well. E03 can work, but the school cutoffs sit close to Danforth Ave.
+    note: Not a TRREB community. The owner says E01 and E02 are fine and E03 can work, with the school cutoffs close to Danforth Ave. TRREB's map puts E03 north of Danforth Ave, E02 south of Danforth and east of Coxwell Ave, and E01 west of Coxwell.
   - name: Sunnylea
     side: west
-    districts: [W07, W08]
-    confidence: unconfirmed
-    note: Not a TRREB community. TRREB's official map makes W07 (Stonegate-Queensway) the area south of Bloor and Dundas between Islington Ave and the Humber River, and puts Kingsway South, just north of Bloor, in W08. Check which side of Bloor the streets you care about are on.
+    districts: [W07]
+    confidence: confident
+    short_note: W08 (Kingsway South, north of Bloor) is excluded.
+    note: Not a TRREB community. The owner chose W07 (Stonegate-Queensway, south of Bloor and Dundas between Islington Ave and the Humber River). W08, which includes Kingsway South just north of Bloor, is excluded by the owner.
+  - name: South Parkdale / Roncesvalles / High Park-Swansea
+    side: west
+    districts: [W01]
+    confidence: confident
+    note: Added by the owner. TRREB's official map lists South Parkdale, Roncesvalles and High Park-Swansea under W01.
 
 # Human readable labels for TRREB districts that appear in the target areas.
 district_labels:
   E01: Riverdale, Leslieville
   E02: Beaches, East End-Danforth
   E03: East York, Danforth
+  W01: South Parkdale, Roncesvalles, High Park-Swansea
   W07: Stonegate-Queensway
-  W08: Etobicoke (Kingsway South and others)

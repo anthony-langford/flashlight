@@ -143,6 +143,7 @@ export function DistrictPanel({ data, tokens: t }: Props) {
             <span className={a.confidence === "confident" ? "tag ok" : "tag warn"}>
               {a.confidence === "confident" ? "mapping confirmed" : "mapping unconfirmed"}
             </span>
+            {a.short_note && <span className="muted small"> {a.short_note}</span>}
           </li>
         ))}
       </ul>

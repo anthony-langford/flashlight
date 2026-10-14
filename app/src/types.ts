@@ -40,6 +40,7 @@ export type TargetArea = {
   districts: string[];
   confidence: "confident" | "unconfirmed";
   note: string;
+  short_note?: string;
 };
 
 export type Buyer = {
