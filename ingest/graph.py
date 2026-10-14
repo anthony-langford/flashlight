@@ -16,11 +16,15 @@ import duckdb
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from ingest.db import TRREB_FIELDS
 from ingest.models import SeriesDef
 
 GRAPH_DIR = Path(__file__).resolve().parent.parent / "graph"
 
 MIN_OVERLAP_MONTHS = 60
+# Between these two limits the check runs but is labelled preliminary and searches few lags.
+PRELIMINARY_MIN_MONTHS = 24
+PRELIMINARY_MAX_LAG = 3
 MIN_ABS_CORR = 0.15
 
 
@@ -58,8 +62,11 @@ class Node(BaseModel):
     def one_source(self) -> Node:
         if self.series and self.trreb:
             raise ValueError(f"node {self.id}: use either series or trreb, not both")
-        if self.trreb and self.trreb.kind == "market" and not self.trreb.field:
-            raise ValueError(f"node {self.id}: a market trreb reference needs a field")
+        if self.trreb and self.trreb.kind == "market":
+            if not self.trreb.field:
+                raise ValueError(f"node {self.id}: a market trreb reference needs a field")
+            if self.trreb.field not in TRREB_FIELDS:
+                raise ValueError(f"node {self.id}: unknown trreb field {self.trreb.field!r}")
         return self
 
 
@@ -178,12 +185,20 @@ def edge_evidence(
     sign: str,
     max_lag: int,
 ) -> dict:
-    """Is the history consistent with the claimed sign, searching lags 0 to max_lag months?"""
+    """Is the history consistent with the claimed sign, searching lags 0 to max_lag months?
+
+    With 60 or more overlapping months the full search runs. With 24 to 59 the result is marked
+    `preliminary` and only lags up to 3 months are searched, because trying many lags on a short
+    history mostly finds noise. Below 24 months no number is given.
+    """
     x = monthly_changes(to_monthly(x_obs), is_rate_like(x_unit))
     y = monthly_changes(to_monthly(y_obs), is_rate_like(y_unit))
     overlap = len(set(x) & set(y))
-    if overlap < MIN_OVERLAP_MONTHS:
+    if overlap < PRELIMINARY_MIN_MONTHS:
         return {"status": "insufficient", "overlap_months": overlap}
+    preliminary = overlap < MIN_OVERLAP_MONTHS
+    if preliminary:
+        max_lag = min(max_lag, PRELIMINARY_MAX_LAG)
     best: tuple[float, int, int] | None = None
     for lag in range(0, max_lag + 1):
         r, n = lagged_corr(x, y, lag)
@@ -201,7 +216,9 @@ def edge_evidence(
         status = "opposite"
     return {
         "status": status,
+        "preliminary": preliminary,
         "best_lag_months": lag,
+        "searched_lags": max_lag,
         "best_corr": round(r, 3),
         "corr_at_zero": None if r0 is None else round(r0, 3),
         "pairs": n,
@@ -217,13 +234,30 @@ def graph_payload(
     node_by_id = {n.id: n for n in graph.nodes}
 
     def series_of(node_id: str) -> tuple[list[tuple[date, float]], str] | None:
-        s = node_by_id[node_id].series
-        if not s:
+        node = node_by_id[node_id]
+        if node.series:
+            rows = conn.execute(
+                "SELECT obs_date, value FROM observation WHERE series_id = ? ORDER BY obs_date",
+                [node.series],
+            ).fetchall()
+            return ([(d, float(v)) for d, v in rows], units[node.series]) if rows else None
+        t = node.trreb
+        if t is None:
             return None
-        rows = conn.execute(
-            "SELECT obs_date, value FROM observation WHERE series_id = ? ORDER BY obs_date", [s]
-        ).fetchall()
-        return ([(d, float(v)) for d, v in rows], units[s]) if rows else None
+        if t.kind == "market":
+            # t.field was validated against the known column names when the graph was loaded.
+            rows = conn.execute(
+                f"SELECT period, {t.field} FROM trreb_monthly "
+                f"WHERE area = ? AND home_type = ? AND {t.field} IS NOT NULL ORDER BY period",
+                [t.area, t.home_type],
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT period, benchmark FROM trreb_hpi "
+                "WHERE area = ? AND home_type = ? AND benchmark IS NOT NULL ORDER BY period",
+                [t.area, t.home_type],
+            ).fetchall()
+        return ([(d, float(v)) for d, v in rows], "level") if rows else None
 
     edges = []
     for e in graph.edges:

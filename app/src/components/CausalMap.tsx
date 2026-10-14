@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { sliceRange } from "../data";
 import { useSeriesData } from "../hooks";
 import {
-  EVIDENCE_TEXT,
+  evidenceLabel,
   COL_GAP,
   LEFT,
   NODE_H,
@@ -195,7 +195,7 @@ export function CausalMap({
                 onClick={() => setSelection({ kind: "edge", index: i })}
                 onKeyDown={onKey(() => setSelection({ kind: "edge", index: i }))}
               >
-                <title>{`${label}. ${EVIDENCE_TEXT[e.evidence.status]}.`}</title>
+                <title>{`${label}. ${evidenceLabel(e)}.`}</title>
                 <path d={d} className="hit" />
                 <path
                   d={d}
@@ -272,7 +272,7 @@ export function CausalMap({
       </div>
       <p className="muted small">
         P is where the latest reading sits in its own history (P90 means 90% of past readings were at or
-        below it). Toronto market nodes have only one month of data so far.
+        below it). Toronto market nodes show the latest TRREB month. Their history only starts in January 2024, so checks on them are preliminary.
       </p>
 
       {shockDir && (
@@ -327,7 +327,7 @@ export function CausalMap({
                   <td>{e.lag}</td>
                   <td>{e.confidence}</td>
                   <td>{e.review}</td>
-                  <td>{EVIDENCE_TEXT[e.evidence.status]}</td>
+                  <td>{evidenceLabel(e)}</td>
                 </tr>
               ))}
             </tbody>
@@ -491,7 +491,7 @@ function EdgePanel({
         <li><strong>Typical timing:</strong> {edge.lag}</li>
         <li><strong>Confidence:</strong> {edge.confidence}</li>
         <li><strong>Review status:</strong> {edge.review === "draft" ? "draft, not yet reviewed by you" : "reviewed"}</li>
-        <li><strong>Data check:</strong> {EVIDENCE_TEXT[edge.evidence.status]}. {evidenceDetail(edge)}</li>
+        <li><strong>Data check:</strong> {evidenceLabel(edge)}. {evidenceDetail(edge)}</li>
       </ul>
       <p className="muted small">
         The data check looks at monthly changes and asks only whether the history is consistent with the

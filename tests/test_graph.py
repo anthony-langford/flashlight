@@ -146,3 +146,83 @@ def test_monthly_keeps_last_observation_in_month():
     obs = [(date(2026, 1, 3), 1.0), (date(2026, 1, 28), 2.0), (date(2026, 2, 1), 3.0)]
     m = g.to_monthly(obs)
     assert sorted(m.values()) == [2.0, 3.0]
+
+
+def test_medium_history_is_labelled_preliminary_and_searches_few_lags():
+    rnd = random.Random(11)
+    x = _series(21, months=40)
+    dx = [b[1] - a[1] for a, b in zip(x, x[1:], strict=False)]
+    v, y_vals = 50.0, []
+    for i in range(len(x)):
+        # dx[j] is x's change into month j+1, so dx[i-2] is x's change in month i-1: a lead of one
+        v += (dx[i - 2] if i >= 2 else 0.0) + rnd.gauss(0, 0.2)
+        y_vals.append(v)
+    y = [(d, val) for (d, _), val in zip(x, y_vals, strict=True)]
+    ev = g.edge_evidence(x, "percent", y, "percent", "+", max_lag=12)
+    assert ev["preliminary"] is True
+    assert ev["searched_lags"] == g.PRELIMINARY_MAX_LAG
+    assert ev["status"] == "consistent" and ev["best_lag_months"] == 1
+
+
+def test_long_history_is_not_preliminary():
+    ev = g.edge_evidence(_series(31), "percent", _series(32), "percent", "+", max_lag=6)
+    assert ev["preliminary"] is False and ev["searched_lags"] == 6
+
+
+def test_unknown_trreb_field_is_rejected(tmp_path):
+    n = _node(
+        "a", trreb={"kind": "market", "area": "x", "home_type": "y", "field": "x; DROP TABLE"}
+    )
+    _write(tmp_path, [n], [])
+    with pytest.raises(ValueError, match="unknown trreb field"):
+        g.load_graph(tmp_path)
+
+
+def test_payload_uses_trreb_series_for_trreb_nodes(tmp_path):
+    from ingest import db
+    from ingest.sources.trreb import DistrictRow
+
+    conn = db.connect(":memory:")
+    rows = []
+    y, m = 2024, 1
+    rnd = random.Random(5)
+    for _ in range(40):
+        s = 1000 + rnd.gauss(0, 50)
+        rows.append(
+            DistrictRow(
+                date(y, m, 1),
+                "City of Toronto",
+                "all",
+                {"sales": s, "months_inventory": 3 - s / 1000},
+            )
+        )
+        m += 1
+        if m == 13:
+            y, m = y + 1, 1
+    db.upsert_trreb(conn, rows)
+    nodes = [
+        _node(
+            "sales",
+            trreb={
+                "kind": "market",
+                "area": "City of Toronto",
+                "home_type": "all",
+                "field": "sales",
+            },
+        ),
+        _node(
+            "inv",
+            col=1,
+            trreb={
+                "kind": "market",
+                "area": "City of Toronto",
+                "home_type": "all",
+                "field": "months_inventory",
+            },
+        ),
+    ]
+    _write(tmp_path, nodes, [_edge("sales", "inv", sign="-", max_lag_months=2)])
+    payload = g.graph_payload(g.load_graph(tmp_path), conn, [])
+    ev = payload["edges"][0]["evidence"]
+    assert ev["preliminary"] is True and ev["status"] == "consistent"
+    assert ev["best_corr"] < -0.5

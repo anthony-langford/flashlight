@@ -286,3 +286,206 @@ def parse_hpi(bbox_html: str) -> list[HpiRow]:
                     if len(vals) == 3:
                         rows.append(HpiRow(period, area, HPI_TYPES[g], *vals))
     return rows
+
+
+# --- Older sales-table layout (before September 2026) --------------------------------------------
+# In those PDFs every table row is drawn twice: once at its own position and once again, with the
+# same text at the same x position, in the next row's slot. So the words in slot N are row N plus a
+# copy of row N-1, and row N is slot N minus a copy of row N-1. Plain text extraction scrambles
+# this, so we work from word positions. Every recovered row must pass an arithmetic check
+# (average price is dollar volume divided by sales) or it is dropped.
+
+_OLD_TITLE = re.compile(
+    r"SUMMARY OF EXISTING HOME TRANSACTIONS\s+"
+    r"(?P<type>.+?), (?P<month>[A-Za-z-]+) (?P<year>\d{4})\s*$"
+)
+_HOME_TYPES_LOWER = {k.lower(): v for k, v in HOME_TYPES.items()}
+_GHOST_NOISE = {"Abc"}
+_MAX_PRICE_MISMATCH = 0.01
+
+
+def _page_slots(page_html: str) -> list[list[tuple[float, str]]]:
+    """Words grouped into row slots by y position (ghost copies land in the next row's slot)."""
+    words = sorted(
+        (float(m["y0"]), float(m["x0"]), html.unescape(m["t"])) for m in _WORD.finditer(page_html)
+    )
+    slots: list[tuple[float, list[tuple[float, str]]]] = []
+    for y, x, text in words:
+        if text in _GHOST_NOISE:
+            continue
+        if slots and abs(slots[-1][0] - y) <= 3.0:
+            slots[-1][1].append((x, text))
+        else:
+            slots.append((y, [(x, text)]))
+    return [sorted(ws) for _, ws in slots]
+
+
+def _old_columns(slot: list[tuple[float, str]]) -> list[tuple[float, str]] | None:
+    """(x, field) for each column in a header slot like 'Sales Dollar Volume Average Price ...'."""
+    words = list(slot)
+    names = sorted(COLUMNS, key=lambda n: -len(n.split()))
+    cols: list[tuple[float, str]] = []
+    i = 0
+    while i < len(words):
+        for name in names:
+            n = len(name.split())
+            if " ".join(t for _, t in words[i : i + n]) == name:
+                cols.append((words[i][0], COLUMNS[name]))
+                i += n
+                break
+        else:
+            return None
+    return cols if cols and cols[0][1] == "sales" else None
+
+
+def _column_for(x: float, cols: list[tuple[float, str]]) -> str | None:
+    """The column whose header starts at or just left of x (values sit under or right of it)."""
+    best = None
+    for cx, field in cols:
+        if x >= cx - 6:
+            best = field
+    return best
+
+
+def _remove_copy(
+    slot: list[tuple[float, str]], previous: list[tuple[float, str]]
+) -> tuple[list[tuple[float, str]], list[tuple[float, str]]]:
+    """Remove one copy of each of the previous row's words from this slot.
+
+    Returns (remaining words, removed words). Identical text at an identical position can be
+    collapsed into one word by the extractor, so a row may also be missing a word it really has.
+    """
+    remaining = list(slot)
+    removed: list[tuple[float, str]] = []
+    for px, pt in previous:
+        for i, (x, t) in enumerate(remaining):
+            if t == pt and abs(x - px) < 0.6:
+                removed.append(remaining.pop(i))
+                break
+    return remaining, removed
+
+
+def _fill_collapsed(
+    own: list[tuple[float, str]],
+    removed: list[tuple[float, str]],
+    *,
+    below: float | None = None,
+    at_or_above: float | None = None,
+) -> list[tuple[float, str]]:
+    """Add back removed words at positions where the row has no word of its own.
+
+    `below` limits this to positions left of an x value (the name area), `at_or_above` to positions
+    from an x value rightward (the numeric columns).
+    """
+    out = list(own)
+    for rx, rt in removed:
+        if below is not None and rx >= below:
+            continue
+        if at_or_above is not None and rx < at_or_above:
+            continue
+        if not any(abs(x - rx) < 0.6 for x, _ in out):
+            out.append((rx, rt))
+    return sorted(out)
+
+
+# Columns that anchor the arithmetic check. If two words compete for one of these the row is lost.
+_KEY_FIELDS = {"sales", "dollar_volume", "avg_price"}
+
+
+def _row_values(
+    own: list[tuple[float, str]], cols: list[tuple[float, str]]
+) -> tuple[dict[str, float | None], set[str]]:
+    """Map a row's numbers to columns. Returns (values, fields where two words competed)."""
+    values: dict[str, float | None] = {c: None for _, c in cols}
+    seen: set[str] = set()
+    conflicts: set[str] = set()
+    for x, t in own:
+        if not _NUMERIC.match(t):
+            continue
+        field = _column_for(x, cols)
+        if field is None:
+            continue
+        if field in seen:
+            conflicts.add(field)
+            values[field] = None
+            continue
+        seen.add(field)
+        values[field] = _num(t)
+    return values, conflicts
+
+
+def _usable(values: dict[str, float | None], conflicts: set[str]) -> dict[str, float | None] | None:
+    """Apply the checks. Competing words in a non-key column leave that column unknown."""
+    if conflicts & _KEY_FIELDS:
+        return None
+    if values.get("sales") == 0:
+        # A zero-sales row has blank price cells, and any other word in the slot is likely a
+        # leftover copy of the previous row, so keep only the sales count.
+        return {k: (0.0 if k == "sales" else None) for k in values}
+    return values if _row_is_consistent(values) else None
+
+
+def parse_old_layout(bbox_html: str) -> list[DistrictRow]:
+    """District rows from the older Market Watch layout. Rows that fail the checks are dropped."""
+    out: list[DistrictRow] = []
+    dropped = 0
+    for page in bbox_html.split("<page ")[1:]:
+        meta: tuple[str, date] | None = None
+        cols: list[tuple[float, str]] | None = None
+        previous: list[tuple[float, str]] = []
+        for slot in _page_slots(page):
+            text = " ".join(t for _, t in slot)
+            m = _OLD_TITLE.search(text)
+            if m:
+                ht = _HOME_TYPES_LOWER.get(m["type"].strip().lower())
+                month = MONTHS.get(m["month"])
+                meta = (ht, date(int(m["year"]), month, 1)) if ht and month else None
+                cols, previous = None, []
+                continue
+            if meta is None:
+                continue
+            if cols is None:
+                cols = _old_columns(slot)
+                continue
+            name_limit = cols[0][0] - 20
+            own, removed = _remove_copy(slot, previous)
+            # Only the first word of a name ("Toronto" repeated down the page) is realistically
+            # collapsed with the previous row's identical copy.
+            start_x = min((x for x, _ in slot if x < name_limit), default=0.0)
+            own = _fill_collapsed(own, removed, below=start_x + 1.0)
+            previous_row = list(own)
+            name = " ".join(t for x, t in own if x < name_limit)
+            if not name or not any(_NUMERIC.match(t) for _, t in own):
+                previous = previous_row
+                continue
+            raw, conflicts = _row_values(own, cols)
+            values = _usable(raw, conflicts)
+            # A numeric value equal to the previous row's may have been collapsed away. Rows with
+            # sales have every cell filled, so restore gaps there too.
+            if values is None or values.get("sales", 0) > 0:
+                retry = _fill_collapsed(own, removed, at_or_above=name_limit)
+                raw2, conflicts2 = _row_values(retry, cols)
+                retry_values = _usable(raw2, conflicts2)
+                if retry_values is not None:
+                    values, own = retry_values, retry
+            previous = list(own)
+            if values is None:
+                dropped += 1
+                log.debug("dropped %s (%s, %s)", name, meta[0], meta[1])
+                continue
+            out.append(DistrictRow(meta[1], name, meta[0], values))
+    if dropped:
+        log.warning("%d old-layout rows failed the consistency checks and were dropped", dropped)
+    return out
+
+
+def _row_is_consistent(v: dict[str, float | None]) -> bool:
+    """Sales must be present, and average price must equal dollar volume divided by sales."""
+    sales, volume, avg = v.get("sales"), v.get("dollar_volume"), v.get("avg_price")
+    if sales is None:
+        return False
+    if sales == 0:
+        return avg is None and volume is None
+    if volume is None or avg is None or avg == 0:
+        return False
+    return abs(volume / sales / avg - 1) <= _MAX_PRICE_MISMATCH

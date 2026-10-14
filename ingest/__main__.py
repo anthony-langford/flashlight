@@ -39,11 +39,13 @@ def run_trreb(args: argparse.Namespace) -> int:
                     print(f"{year}-{month:02d}  not published")
                 else:
                     rows = trreb.parse_text(trreb.pdf_to_text(path))
+                    if not rows:  # earlier layout: rows are drawn twice, recover from positions
+                        rows = trreb.parse_old_layout(trreb.pdf_to_bbox(path))
                     db.upsert_trreb(conn, rows)
                     hpi = trreb.parse_hpi(trreb.pdf_to_bbox(path))
                     db.upsert_hpi(conn, hpi)
                     if rows or hpi:
-                        note = "" if rows else " (sales tables not parsed: older layout)"
+                        note = "" if rows else " (sales tables not parsed)"
                         print(f"{year}-{month:02d}  {len(rows)} rows, {len(hpi)} HPI rows{note}")
                     else:
                         print(f"{year}-{month:02d}  nothing parsed", file=sys.stderr)

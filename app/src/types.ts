@@ -86,6 +86,8 @@ export type HpiRow = {
 
 export type EdgeEvidence = {
   status: "consistent" | "weak" | "opposite" | "insufficient" | "no_series";
+  preliminary?: boolean;
+  searched_lags?: number;
   best_lag_months?: number;
   best_corr?: number;
   corr_at_zero?: number | null;

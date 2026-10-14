@@ -5,6 +5,7 @@ import type { Tokens } from "../theme";
 import type { AppData } from "../types";
 import { Chart } from "./Chart";
 import { HpiTrend } from "./HpiTrend";
+import { SalesTrend } from "./SalesTrend";
 
 type Props = { data: AppData; tokens: Tokens };
 
@@ -160,6 +161,8 @@ export function DistrictPanel({ data, tokens: t }: Props) {
 
       <HpiTrend hpi={hpi} districts={districts} labels={labels} budget={buyer.budget} tokens={t} />
 
+      <SalesTrend market={market} districts={districts} labels={labels} tokens={t} />
+
       <h3>Sales activity</h3>
       <div className="table-scroll">
         <table>
@@ -214,7 +217,7 @@ export function DistrictPanel({ data, tokens: t }: Props) {
         * fewer than 10 sales. Sale / list is the average sale price as a share of the list price, so
         above 100% means bidding over asking. Active &divide; sales is active listings divided by the
         month&apos;s sales, a rough months-of-supply gauge and not TRREB&apos;s own measure. Only one
-        month of sales activity is loaded so far (older report layouts could not be read), so the sales table has no trend. The benchmark trend above does.
+        month is shown in the table, the charts above show the history.
       </p>
     </section>
   );

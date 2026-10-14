@@ -20,11 +20,11 @@ Last updated: 2026-10-14. Phase: M1 (data), M2 (export and first UI), M3 (causal
 - [x] DuckDB schema, idempotent upserts, 45-day revision lookback, per-series error isolation
 - [x] FRED client (key via `.env`, redacted from logs, errors and the DB; tests). 8 FRED series plus BoC USD/CAD synced live 2026-10-14
 - [x] StatCan client (vector-based, verified live; matches results by vector id because the API reorders batches). Retry with backoff for transient errors
-- [x] TRREB Market Watch parser: monthly district tables by home type (sales, prices, listings, SP/LP, days on market). Verified on Sept 2026 PDF (760 rows). `uv run python -m ingest trreb --from 2026-09`. MLS HPI benchmark prices by district also parsed, positions-based, with history for all 33 months from Jan 2024 (cross-checked against TRREB's reported year-over-year). The older layouts' sales tables are still unsupported
+- [x] TRREB Market Watch parser: monthly district tables by home type (sales, prices, listings, SP/LP, days on market). Verified on Sept 2026 PDF (760 rows). `uv run python -m ingest trreb --from 2026-09`. MLS HPI benchmark prices by district also parsed, positions-based, with history for all 33 months from Jan 2024 (cross-checked against TRREB's reported year-over-year). The older layouts' sales tables are recovered from word positions (32 months, validated against TRREB's own subtotals: 169 of 169 sales groups match)
 - [x] CMHC Rental Market Survey (Toronto CMA vacancy, turnover, two-bedroom rent and change; editions 2021 to 2025 downloaded and parsed). 4 series. Purpose-built apartments only
 - [x] Export step: `uv run python -m ingest export` writes catalogue summaries (latest value, 1-year change, year-over-year for index series, percentile, staleness), per-series JSON and TRREB tables to `app/public/data/` (gitignored). Buyer profile in `config/buyer.yaml`
-- [x] React app (Vite, TypeScript, ECharts) with two views: Overview (market snapshot tiles, target-district HPI benchmark chart against your budget band, 33-month benchmark trend per district, district sales table) and Indicators (all 42 series with range filter, year-over-year toggle for index series, table view, percentile meter, draft explainers, source and licence). Light and dark themes, colors validated. Linkable via `#/indicators/<series id>`. 12 unit tests
-- [x] Causal map (M3): validated graph in `graph/` (19 nodes, 19 edges, all drafts), per-edge data check on monthly changes (8 consistent, 1 insufficient, 10 no long series), accessible SVG map with node readouts, edge detail, shock tracing (illustrative, not a forecast), table twin, linkable views. See docs/CAUSAL_MAP.md
+- [x] React app (Vite, TypeScript, ECharts) with two views: Overview (market snapshot tiles, target-district HPI benchmark chart against your budget band, 33-month benchmark trend per district, sale-to-list, days-on-market and sales trends per district, district sales table) and Indicators (all 42 series with range filter, year-over-year toggle for index series, table view, percentile meter, draft explainers, source and licence). Light and dark themes, colors validated. Linkable via `#/indicators/<series id>`. 12 unit tests
+- [x] Causal map (M3): validated graph in `graph/` (19 nodes, 19 edges, all drafts), per-edge data check on monthly changes (see docs/CAUSAL_MAP.md for the current results, including preliminary ones for the Toronto housing chain), accessible SVG map with node readouts, edge detail, shock tracing (illustrative, not a forecast), table twin, linkable views. See docs/CAUSAL_MAP.md
 - [ ] Owner review of the drafted explainers and the 19 edges
 - [x] Mortgage rules verified from official pages (docs/MORTGAGE_RULES.md) and Affordability tab built: monthly payment, stress-test payment, cash needed at closing with land transfer taxes and rebates, sensitivity grid across your budget and rates, scenarios presettable from the URL. 16 tests against independently computed values
 
@@ -40,7 +40,7 @@ Stated by the owner on 2026-10-14.
 
 ## Next steps
 
-1. TRREB sales-table history before Sept 2026 (older layout has duplicated text rows). HPI history is done, sales history builds month by month meanwhile.
+1. Owner review of explainers and edges (below). Then refinements: more months back than January 2024, a Toronto-level new-listings fix, and Monarch Park and Sunnylea district confirmation.
 2. Owner review of the 19 draft edges (`graph/edges.yaml`) and the drafted explainers. Add edges for immigration policy and the stress test if you agree.
 3. Ask the owner: first-time buyer? Which rate to assume? Then refine the calculator defaults.
 
@@ -61,7 +61,7 @@ Stated by the owner on 2026-10-14.
 ## Open questions
 
 - Neighbourhood to TRREB district mapping. Riverdale is E01 (2019 community report). Monarch Park (candidates E01, E02, E03) and Sunnylea (candidates W07, W08) are unconfirmed. See docs/DATA_SOURCES.md. Needs school catchment boundaries and current TRREB maps.
-- How to recover TRREB sales-table history before Sept 2026 (older layout has duplicated text rows). HPI price history is already loaded.
+- Whether to go further back than January 2024 for TRREB history. Older PDFs may use other layouts, untested.
 - Which school-quality source, if any, is acceptable to use.
 
 ## Mortgage rules
@@ -148,3 +148,4 @@ Educational project. Nothing here is financial, mortgage or real estate advice.
 | 2026-10-14 | Independent review (advisor) of M1, M2 and the calculator. Finding: mortgage and licence facts had only passed through a page-summarising tool. Re-checked every constant against raw page text. All matched, the FCAC $1M versus $1.5M conflict is real, the Ontario page's own closed-form formulas match our tax numbers. Rule added to AGENTS.md: verify numbers the code depends on in raw HTML. |
 | 2026-10-14 | Built the causal map (M3). Review of it caught: vertical connections cutting through nodes (rerouted as side curves), oversized arrowheads (SVG marker units), labels touching node borders, faint dimming in dark mode, and proper names lowercased in the edge sentence. Doc counts were first written from memory and were wrong, now taken from the export. |
 | 2026-10-14 | Recovered TRREB HPI history (33 months) after finding the older HPI pages parse once two bugs were fixed (a page title containing "Index" and "Benchmark" was mistaken for a header, and a row with one incomplete group was dropped). Added benchmark trend panels per district. Review: a suspicious 25% jump in E02 detached turned out to be TRREB's own small-district volatility (index and benchmark stay proportional), so a caution was added instead of a fix. Fixed axis label collisions. Finding for the buyer: detached benchmarks are lower than in Jan 2024 in all five districts. |
+| 2026-10-14 | Recovered TRREB sales-table history for 32 older months by reconstructing rows that the older PDFs draw twice. Self-review of that work found: my first model of the duplication was too simple (identical words get collapsed, some cells are absent), name words were being re-added too eagerly, and two of my own test constructions had off-by-one lags. Added a preliminary evidence tier so the Toronto housing chain can be checked (months of inventory leading prices is consistent, rents leading sales points the opposite way to the draft claim). Added sale-to-list, days-on-market and sales trend charts with an explicit note when a line is omitted for too few sales. |

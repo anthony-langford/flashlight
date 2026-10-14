@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canvasSize, edgeGeometry, nodePos, propagate, trendOf, weakestConfidence } from "./graphModel";
+import { canvasSize, edgeGeometry, evidenceDetail, evidenceLabel, nodePos, propagate, trendOf, weakestConfidence } from "./graphModel";
 import type { GraphData, GraphEdge, GraphNode, SeriesSummary } from "./types";
 
 const node = (id: string, col: number, row = 0): GraphNode => ({ id, label: id, col, row, series: null, trreb: null });
@@ -106,5 +106,25 @@ describe("layout", () => {
     expect(down.mid.x).toBeGreaterThanOrEqual(0);
     // in the last column everything bows right into the right margin
     expect(edgeGeometry(c, a, 0).mid.x).toBeGreaterThan(nodePos(a).x + 150);
+  });
+});
+
+describe("evidence text", () => {
+  const e = (evidence: GraphEdge["evidence"]): GraphEdge => ({ ...edge("a", "b", "+"), evidence });
+  it("labels preliminary results and says why they are weak", () => {
+    const g = e({ status: "consistent", preliminary: true, best_lag_months: 2, searched_lags: 3, best_corr: -0.3, pairs: 28, overlap_months: 31 });
+    expect(evidenceLabel(g)).toBe("Consistent with the claim (preliminary)");
+    expect(evidenceDetail(g)).toMatch(/Preliminary: only 31 months/);
+    expect(evidenceDetail(g)).toMatch(/lags 0 to 3/);
+  });
+  it("does not add the preliminary note to a full result", () => {
+    const g = e({ status: "consistent", preliminary: false, best_lag_months: 0, best_corr: 0.79, pairs: 309, overlap_months: 309 });
+    expect(evidenceLabel(g)).toBe("Consistent with the claim");
+    expect(evidenceDetail(g)).not.toMatch(/Preliminary/);
+    expect(evidenceDetail(g)).toMatch(/the same month/);
+  });
+  it("explains the insufficient and no-series cases without numbers", () => {
+    expect(evidenceDetail(e({ status: "insufficient", overlap_months: 12 }))).toMatch(/Only 12 months/);
+    expect(evidenceDetail(e({ status: "no_series" }))).toMatch(/rests on the rationale/);
   });
 });

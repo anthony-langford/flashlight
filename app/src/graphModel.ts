@@ -107,7 +107,7 @@ export function nodeReadout(node: GraphNode, data: AppData): Readout | null {
     if (v === null || v === undefined) return null;
     return {
       value: t.field === "months_inventory" ? v.toFixed(1) : v.toLocaleString("en-CA"),
-      sub: `${fmtDate(period, "monthly")}, 1 month so far`,
+      sub: `${fmtDate(period, "monthly")}, TRREB`,
       trend: null,
       percentile: null,
     };
@@ -118,7 +118,7 @@ export function nodeReadout(node: GraphNode, data: AppData): Readout | null {
   const y = row.yoy_pct;
   return {
     value: fmtMoneyCompact(row.benchmark),
-    sub: `${fmtDate(period, "monthly")}, 1 month so far`,
+    sub: `${fmtDate(period, "monthly")}, TRREB`,
     trend: y === null ? null : Math.abs(y) < 0.25 ? "flat" : y > 0 ? "up" : "down",
     percentile: null,
   };
@@ -136,12 +136,22 @@ export function evidenceDetail(e: GraphEdge): string {
   const ev = e.evidence;
   if ((ev.status === "consistent" || ev.status === "weak" || ev.status === "opposite") && ev.best_corr !== undefined) {
     const lag = ev.best_lag_months === 0 ? "the same month" : `${ev.best_lag_months} month${ev.best_lag_months === 1 ? "" : "s"} later`;
-    return `Strongest link in monthly changes: correlation ${ev.best_corr.toFixed(2)}, ${lag} (${ev.pairs} months compared, best of lags 0 to ${e.max_lag_months}).`;
+    const searched = ev.searched_lags ?? e.max_lag_months;
+    const prelim = ev.preliminary
+      ? ` Preliminary: only ${ev.overlap_months} months of history so far, so only lags up to ${searched} months were tried and the result could easily change.`
+      : "";
+    return `Strongest link in monthly changes: correlation ${ev.best_corr.toFixed(2)}, ${lag} (${ev.pairs} months compared, best of lags 0 to ${searched}).${prelim}`;
   }
   if (ev.status === "insufficient") {
-    return `Only ${ev.overlap_months ?? 0} months of overlapping monthly data. At least 60 are needed, so no number is shown.`;
+    return `Only ${ev.overlap_months ?? 0} months of overlapping monthly data. At least 24 are needed for a preliminary check and 60 for a full one, so no number is shown.`;
   }
   return "One or both ends have no data series with enough history, so the claim rests on the rationale alone.";
+}
+
+/** Short status label for tables and tooltips. */
+export function evidenceLabel(e: GraphEdge): string {
+  const base = EVIDENCE_TEXT[e.evidence.status];
+  return e.evidence.preliminary ? `${base} (preliminary)` : base;
 }
 
 // --- Layout --------------------------------------------------------------------------------

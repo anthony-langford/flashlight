@@ -212,3 +212,111 @@ def test_parse_hpi_keeps_a_row_when_one_group_is_incomplete():
     w03 = {r.home_type: r for r in rows if r.area == "Toronto W03"}
     assert w03["composite"].benchmark == 861_400
     assert "townhouse" not in w03
+
+
+# --- Older layout: every row is drawn twice, the copy in the next row's slot ---------------------
+COLS = [(100, "Sales"), (150, "Dollar Volume"), (220, "Average Price"), (290, "New Listings"),
+        (350, "Active Listings"), (410, "Avg. SP/LP")]  # fmt: skip
+
+
+def _old_page(rows, collapse=(), drop_own=()):
+    """Build a bbox page in the older layout.
+
+    rows: [(name tokens at x 13 and 37, [values by column or None])]. Slot N holds row N's words
+    and a copy of row N-1's words. `collapse` lists (row, col) cells whose own word is merged with
+    the previous row's identical copy. `drop_own` lists (row, col) cells whose own copy is absent.
+    """
+    out = [_word(13, 40, "SUMMARY"), _word(90, 40, "OF"), _word(120, 40, "EXISTING"),
+           _word(180, 40, "HOME"), _word(220, 40, "TRANSACTIONS"), _word(628, 40, "Detached,"),
+           _word(697, 40, "August"), _word(748, 40, "2026")]  # fmt: skip
+    y = 80
+    for x, name in COLS:
+        for i, tok in enumerate(name.split()):
+            out.append(_word(x + i * 25, y, tok))
+    y += 12
+
+    def row_words(r, yy, ghost):
+        names, vals = rows[r]
+        words = [_word(13 + 24 * i, yy, n) for i, n in enumerate(names)]
+        for c, v in enumerate(vals):
+            if v is None:
+                continue
+            if not ghost and (r, c) in drop_own:
+                continue
+            words.append(_word(COLS[c][0] + 3, yy, v))
+        return words
+
+    for r in range(len(rows)):
+        out += row_words(r, y + 12 * r, ghost=False)
+        if r > 0:
+            ghost = row_words(r - 1, y + 12 * r, ghost=True)
+            if collapse:  # drop a ghost word when it would exactly overlap the own word
+                keep = []
+                for w in ghost:
+                    skip = False
+                    for rr, cc in collapse:
+                        if rr == r and _word(COLS[cc][0] + 3, y + 12 * r, rows[rr][1][cc]) == w:
+                            skip = True
+                    keep.append(w) if not skip else None
+                ghost = keep
+            out += ghost
+    return '<page width="900" height="900">' + "".join(out) + "</page>"
+
+
+ROWS = [
+    (
+        ["All", "TRREB", "Areas"],
+        ["2,399", "$3,100,000,000", "$1,292,000", "5,590", "11,347", "97%"],
+    ),
+    (["City", "of", "Toronto"], ["550", "$839,161,967", "$1,525,749", "1,164", "2,401", "97%"]),
+    (["Toronto", "W01"], ["5", "$9,627,600", "$1,925,520", "8", "22", "102%"]),
+    (["Toronto", "W02"], ["9", "$11,496,000", "$1,277,333", "13", "35", "101%"]),
+]
+
+
+def _old(rows=ROWS, **kw):
+    got = trreb.parse_old_layout("<doc>" + _old_page(rows, **kw) + "</doc>")
+    return {r.area: r for r in got}
+
+
+def test_old_layout_recovers_each_row_by_removing_the_previous_rows_copy():
+    got = _old()
+    assert got["Toronto W02"].values["sales"] == 9
+    assert got["Toronto W02"].values["avg_price"] == 1_277_333
+    assert got["Toronto W01"].values["new_listings"] == 8
+    assert got["All TRREB Areas"].values["active_listings"] == 11_347
+    assert got["Toronto W02"].home_type == "detached"
+    assert got["Toronto W02"].period == date(2026, 8, 1)
+
+
+def test_old_layout_restores_a_value_collapsed_into_the_previous_rows_copy():
+    # City of Toronto and All TRREB Areas share "97%" at one x, which extraction collapses to one
+    got = _old(collapse=[(1, 5)])
+    assert got["City of Toronto"].values["sp_lp"] == 97
+
+
+def test_old_layout_drops_a_row_that_fails_the_arithmetic_check():
+    bad = [*ROWS[:3], (["Toronto", "W02"], ["9", "$11,496,000", "$1,777,333", "13", "35", "101%"])]
+    got = _old(bad)
+    assert "Toronto W02" not in got and "Toronto W01" in got
+
+
+def test_old_layout_leaves_an_ambiguous_non_key_cell_unknown_instead_of_guessing():
+    # W01's own "active listings" word is absent, so W02 sees two words competing for that column
+    got = _old(drop_own=[(2, 4)])
+    assert got["Toronto W02"].values["sales"] == 9
+    assert got["Toronto W02"].values["active_listings"] is None
+    assert got["Toronto W02"].values["new_listings"] == 13
+
+
+def test_old_layout_keeps_only_the_sales_count_for_a_zero_sales_row():
+    rows = [*ROWS[:3], (["Toronto", "W02"], ["0", None, None, "3", "3", None])]
+    got = _old(rows)
+    assert got["Toronto W02"].values["sales"] == 0
+    assert got["Toronto W02"].values["avg_price"] is None
+    assert got["Toronto W02"].values["new_listings"] is None
+
+
+def test_old_layout_ignores_pages_without_a_title():
+    page = '<page width="9" height="9">' + _word(10, 10, "Hello") + "</page>"
+    assert trreb.parse_old_layout("<doc>" + page + "</doc>") == []
