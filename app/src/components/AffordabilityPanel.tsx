@@ -6,6 +6,7 @@ import {
   calculate,
   minDownPayment,
   paymentGrid,
+  scenarioFromBuyer,
   type Compounding,
   type Inputs,
 } from "../mortgage";
@@ -55,17 +56,21 @@ function NumberField({
 
 export function AffordabilityPanel({ data, params }: { data: AppData; params?: URLSearchParams }) {
   const { budget } = data.buyer;
-  const mid = round25k((budget.min + budget.max) / 2);
+  const plan = scenarioFromBuyer(data.buyer);
   const num = (key: string, fallback: number) => {
     const v = Number(params?.get(key));
     return params?.get(key) && Number.isFinite(v) && v >= 0 ? v : fallback;
   };
-  const startPrice = num("price", mid);
+  const startPrice = num("price", plan.price);
   const [price, setPrice] = useState(startPrice);
-  const [down, setDown] = useState(num("down", Math.round(startPrice * 0.2)));
+  const [down, setDown] = useState(num("down", Math.round(startPrice * plan.downPct)));
   const [ratePct, setRatePct] = useState(num("rate", 5));
-  const [amortYears, setAmortYears] = useState(num("amort", 25) === 30 ? 30 : 25);
-  const [firstTimeBuyer, setFirstTimeBuyer] = useState(params?.get("ftb") === "1");
+  const [amortYears, setAmortYears] = useState(
+    params?.get("amort") ? (num("amort", 25) === 30 ? 30 : 25) : plan.amortYears,
+  );
+  const [firstTimeBuyer, setFirstTimeBuyer] = useState(
+    params?.get("ftb") ? params.get("ftb") === "1" : plan.firstTimeBuyer,
+  );
   const [compounding, setCompounding] = useState<Compounding>("semiannual");
   const [otherClosing, setOtherClosing] = useState(0);
 
@@ -131,6 +136,7 @@ export function AffordabilityPanel({ data, params }: { data: AppData; params?: U
               ["10%", 0.1],
               ["15%", 0.15],
               ["20%", 0.2],
+              [`${Math.round(plan.downPct * 100)}% (your plan)`, plan.downPct],
             ].map(([label, pct]) => (
               <button key={String(label)} type="button" className="chip" onClick={() => setDownPct(Number(pct))}>
                 {label}

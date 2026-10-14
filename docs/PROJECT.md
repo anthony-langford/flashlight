@@ -9,6 +9,7 @@ Help one person (the owner) understand the Toronto housing market and the macro 
 - Lives in Canada, planning to buy a home in Toronto.
 - Purchase timeline: 3 months to 1 year (stated 2026-10-14). Near-term, so rates, listings, inventory and affordability matter more than long-run demographics.
 - Property type: freehold, semi-detached or detached. Prioritise TRREB semi-detached and detached breakdowns and freehold benchmark prices. Condo and pre-construction data are lower priority.
+- Financing (stated 2026-10-14): 35% down, first-time buyer, 30-year amortization. At 20% or more down the mortgage is uninsured, so there is no premium and the insured price cap does not apply, the lender sets the maximum amortization, and the stress test still applies. The plan relies on a lender program whose terms are unverified.
 - Budget: $1.10M to $1.35M (stated 2026-10-14). Used for affordability defaults. It sits near insured-mortgage price and down payment thresholds, so those rules must be verified before the calculator is built (README list).
 - Target areas (stated 2026-10-14): east end and west end, with good school districts. Named: Riverdale and Monarch Park (east), Sunnylea (west, Etobicoke). TRREB district codes are unconfirmed and must be read from a Market Watch PDF. School quality data is a backlog item.
 - Wants to run it locally first, host it later.

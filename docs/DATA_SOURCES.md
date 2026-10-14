@@ -146,15 +146,23 @@ Personal use only. All TRREB content is copyrighted ("All rights reserved"). PDF
 
 ### Target areas and TRREB districts
 
-TRREB districts are the finest geography in the monthly report. Neighbourhood-level (community) numbers appear only in separate quarterly community reports. The 2019 community reports (https://trreb.ca/wp-content/files/market-stats/community-reports/2019/Q1/Toronto/TorontoEastQ12019.pdf and `TorontoWestQ12019.pdf`) were the newest I could fetch. URLs for 2025 and 2026 reports returned 404, so the current location is unknown. Boundaries may have changed since 2019.
+TRREB districts are the finest geography in the monthly report. Neighbourhood-level (community) numbers appear only in separate quarterly community reports, and the newest I could fetch were from 2019. TRREB's official Toronto district map (PDF, copyright 2021, fetched 2026-10-14: https://webapp.proptx.ca/trrebdata/common/maps/Toronto.pdf) shows every district and community, and I read it directly.
+
+What the map shows for the target areas:
+
+- **E01:** Blake-Jones, Greenwood-Coxwell, North Riverdale, South Riverdale. West of Coxwell Ave, south of the Danforth.
+- **E02:** East End-Danforth, Woodbine Corridor, The Beaches. South of Danforth Ave and east of Coxwell Ave.
+- **E03:** Danforth, Danforth Village-East York, East York, Woodbine-Lumsden, Playter Estates-Danforth, Broadview North, O'Connor-Parkview, Crescent Town. North of Danforth Ave.
+- **W07:** Stonegate-Queensway only. South of Bloor and Dundas, between Islington Ave and the Humber River, down to the Gardiner.
+- **W08:** Kingsway South (just north of Bloor), Edenbridge-Humber Valley, Princess-Rosethorn, Islington-City Centre West, Etobicoke West Mall, Markland Wood, Eringate-Centennial-West Deane.
 
 | Area you named | TRREB district(s) | Evidence |
 |---|---|---|
-| Riverdale | E01 (communities North Riverdale, South Riverdale, Blake-Jones, Greenwood-Coxwell) | 2019 community report. Confident. |
-| Monarch Park | Not a TRREB community. Near Coxwell and Danforth, so the likely candidates are E01, E02 (The Beaches, East End-Danforth, Woodbine Corridor) and E03 (East York, Danforth, Playter Estates-Danforth, Woodbine-Lumsden) | Not verified. Needs the TDSB school catchment boundary compared with TRREB communities. |
-| Sunnylea | Not a TRREB community. Candidates: W07 (Stonegate-Queensway) or W08 (includes Kingsway South, Edenbridge-Humber Valley, Princess-Rosethorn, Islington-City Centre West) | Not verified. |
+| Riverdale | E01 | Official map and 2019 community reports. Confident. |
+| Monarch Park | E01, E02 or E03 depending on the street. Not a TRREB community. | The map gives the boundaries above. Which side of them a street falls on, and which streets are in the school's catchment, I have not verified. |
+| Sunnylea | W07 if south of Bloor, W08 (Kingsway South) if north of Bloor. Not a TRREB community. | The map gives the boundary. The location of Sunnylea relative to Bloor I have not verified. |
 
-Treat the district-to-neighbourhood mapping as a working assumption until checked against current TRREB maps and school catchments.
+**How to confirm a street:** (1) open the map PDF and find the street. (2) Ask your realtor to look up an address on MLS. The listing shows the area code (for example "Toronto W07") and the community. (3) Check the school catchment for that address on the Toronto District School Board's school locator (tdsb.on.ca, not checked by me). Note the district for each catchment street, then tell me which districts to focus on.
 
 ## Known gaps and open items
 
@@ -166,4 +174,4 @@ Treat the district-to-neighbourhood mapping as a working assumption until checke
 6. ~~WDS vector endpoints untested.~~ Done 2026-10-14, see above.
 7. ~~CMHC workbook not downloaded or inspected.~~ Done 2026-10-14. Remaining: rent for houses and condos is not covered by the survey tables loaded here.
 8. **TRREB** current community report URL, and permission to reuse if hosting.
-9. **Neighbourhood to district mapping** for Monarch Park and Sunnylea (see above).
+9. **Neighbourhood to district mapping** for Monarch Park and Sunnylea: boundaries are now known from TRREB's map, the street-level assignment is the owner's to confirm (see above).

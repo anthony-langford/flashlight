@@ -11,8 +11,10 @@ import httpx
 
 from ingest import db
 from ingest import export as export_mod
+from ingest import review as review_mod
 from ingest.catalogue import load_catalogue
 from ingest.config import load_env
+from ingest.graph import load_graph
 from ingest.sources import trreb
 from ingest.sync import sync
 
@@ -69,6 +71,10 @@ def main(argv: list[str] | None = None) -> int:
     t.add_argument("--from", dest="start", required=True, help="first month, YYYY-MM")
     t.add_argument("--to", dest="end", help="last month, YYYY-MM (default: current month)")
     t.add_argument("--db", default=str(db.DEFAULT_DB_PATH))
+    r = sub.add_parser("review", help="write docs/REVIEW_SHEET.md for the owner to review")
+    r.add_argument(
+        "--out", default=str(Path(__file__).resolve().parent.parent / "docs" / "REVIEW_SHEET.md")
+    )
     e = sub.add_parser("export", help="write static JSON for the front end")
     e.add_argument("--db", default=str(db.DEFAULT_DB_PATH))
     e.add_argument("--out", default=str(export_mod.DEFAULT_OUT))
@@ -81,6 +87,12 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "trreb":
         return run_trreb(args)
+    if args.cmd == "review":
+        catalogue = load_catalogue()
+        text = review_mod.render(load_graph(catalogue=catalogue), catalogue)
+        Path(args.out).write_text(text, encoding="utf-8")
+        print(f"wrote {args.out}")
+        return 0
     if args.cmd == "export":
         meta = export_mod.export(
             db.connect(args.db),

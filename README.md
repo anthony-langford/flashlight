@@ -35,13 +35,14 @@ Stated by the owner on 2026-10-14.
 - **Timeline:** 3 months to 1 year. Near-term indicators (rates, listings, inventory, affordability) come first.
 - **Property:** freehold, semi-detached or detached.
 - **Budget:** $1.10M to $1.35M. Used for affordability defaults.
+- **Financing plan:** 35% down (so an uninsured mortgage: no insurance premium, and the insured price cap does not apply), first-time buyer (land transfer tax rebates apply), wants a 30-year amortization. For an uninsured mortgage the lender sets the maximum amortization and the stress test still applies, and the plan relies on a lender program whose terms have not been verified. Confirm both with the lender. The calculator starts from this plan (`config/buyer.yaml`).
 - **Target areas:** east end and west end, with good school districts in mind. Named examples: Riverdale and Monarch Park (east end), Sunnylea (west end, Etobicoke).
-- TRREB districts: Riverdale is E01. Monarch Park and Sunnylea are not TRREB communities and their districts are unconfirmed (see Open questions).
+- TRREB districts: Riverdale is E01. Monarch Park and Sunnylea are not TRREB communities, so their districts depend on the street (see Open questions for the rule from TRREB's official map).
 
 ## Next steps
 
 1. Owner review of explainers and edges (below). Then refinements: more months back than January 2024, a Toronto-level new-listings fix, and Monarch Park and Sunnylea district confirmation.
-2. Owner review of the 19 draft edges (`graph/edges.yaml`) and the drafted explainers. Add edges for immigration policy and the stress test if you agree.
+2. Owner review of the 19 draft edges and the drafted explainers, using `docs/REVIEW_SHEET.md` (regenerate with `uv run python -m ingest review`). Add edges for immigration policy and the stress test if you agree.
 3. Ask the owner: first-time buyer? Which rate to assume? Then refine the calculator defaults.
 
 ## Milestones
@@ -60,7 +61,7 @@ Stated by the owner on 2026-10-14.
 
 ## Open questions
 
-- Neighbourhood to TRREB district mapping. Riverdale is E01 (2019 community report). Monarch Park (candidates E01, E02, E03) and Sunnylea (candidates W07, W08) are unconfirmed. See docs/DATA_SOURCES.md. Needs school catchment boundaries and current TRREB maps.
+- Neighbourhood to TRREB district mapping. Riverdale is E01. TRREB's official map ([PDF](https://webapp.proptx.ca/trrebdata/common/maps/Toronto.pdf)) gives the lines: E03 is north of Danforth Ave, E02 is south of Danforth and east of Coxwell Ave, E01 is west of Coxwell; W07 is south of Bloor and Dundas between Islington Ave and the Humber River, and Kingsway South, just north of Bloor, is W08. Monarch Park and Sunnylea are not TRREB communities, so which district applies depends on the specific streets in the school catchments. The owner needs to check addresses (see docs/DATA_SOURCES.md).
 - Whether to go further back than January 2024 for TRREB history. Older PDFs may use other layouts, untested.
 - Which school-quality source, if any, is acceptable to use.
 
@@ -113,6 +114,7 @@ uv run python -m ingest sync [--source boc_valet] [--series ID] [--full]
                      # fetch series into data/flashlight.duckdb
 uv run python -m ingest trreb --from 2026-09   # download and parse TRREB PDFs
 uv run python -m ingest export                 # write JSON for the app
+uv run python -m ingest review                 # regenerate docs/REVIEW_SHEET.md
 
 cd app && npm install
 npm run dev          # http://localhost:5173 (run the export first)
@@ -150,3 +152,4 @@ Educational project. Nothing here is financial, mortgage or real estate advice.
 | 2026-10-14 | Recovered TRREB HPI history (33 months) after finding the older HPI pages parse once two bugs were fixed (a page title containing "Index" and "Benchmark" was mistaken for a header, and a row with one incomplete group was dropped). Added benchmark trend panels per district. Review: a suspicious 25% jump in E02 detached turned out to be TRREB's own small-district volatility (index and benchmark stay proportional), so a caution was added instead of a fix. Fixed axis label collisions. Finding for the buyer: detached benchmarks are lower than in Jan 2024 in all five districts. |
 | 2026-10-14 | Recovered TRREB sales-table history for 32 older months by reconstructing rows that the older PDFs draw twice. Self-review of that work found: my first model of the duplication was too simple (identical words get collapsed, some cells are absent), name words were being re-added too eagerly, and two of my own test constructions had off-by-one lags. Added a preliminary evidence tier so the Toronto housing chain can be checked (see the next row: its first results were noise). Added sale-to-list, days-on-market and sales trend charts with an explicit note when a line is omitted for too few sales. |
 | 2026-10-14 | Independent review (advisor) of the history and evidence work. Findings and fixes: (1) the preliminary evidence tier was reporting noise as findings, because about 30 months need |r| near 0.37 to beat chance and the series are not seasonally adjusted, so `rents to sales is contradicted` was a false lead. Added a floor of 2/sqrt(pairs) and the seasonality caveat, all six preliminary edges now read no clear relationship, docs corrected. (2) Added an adjacent-duplicate guard and a year-to-date cross-check of the recovered rows (differences are 0 to 1.75% and one-directional, consistent with TRREB revisions). (3) Trend lines now break at excluded months instead of joining across them, which exposed that many gaps were unreadable cells, so added a next-row resolution step (validated against subtotals, 0 failures) and an honest caption. (4) Footers use TRREB's reported year-over-year instead of comparing two noisy months. |
+| 2026-10-14 | Owner shared the financing plan (35% down, first-time buyer, 30-year amortization) and the calculator now starts from it. Read TRREB's official district map (PDF) and recorded the street-level boundary rules for the east and west target areas. Added a generated review sheet so the owner can approve edges and explainers without reading YAML. Self-review: confirmed the calculator's headline numbers against an independent run of the same module. |

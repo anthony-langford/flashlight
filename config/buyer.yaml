@@ -5,6 +5,11 @@ budget:
 timeline: "3 months to 1 year"
 property_types: [detached, semi_detached]
 
+# Financing plan (stated by the owner on 2026-10-14). The calculator starts from this.
+down_payment_pct: 0.35      # 20% or more down means an uninsured mortgage
+first_time_buyer: true      # drives land transfer tax rebates and 30-year insured eligibility
+amortization_years: 30      # for an uninsured mortgage the lender sets the maximum, ask them
+
 # TRREB districts are the finest geography in the monthly Market Watch report.
 # `confidence` records how well the neighbourhood-to-district mapping is supported.
 # See docs/DATA_SOURCES.md, "Target areas and TRREB districts".
@@ -18,12 +23,12 @@ target_areas:
     side: east
     districts: [E01, E02, E03]
     confidence: unconfirmed
-    note: Not a TRREB community. Near Coxwell and Danforth. Candidate districts only. Needs the TDSB catchment compared with TRREB communities.
+    note: Not a TRREB community. TRREB's official map puts E03 north of Danforth Ave, E02 south of Danforth and east of Coxwell Ave, and E01 west of Coxwell. Which applies depends on the street, so check addresses against the TDSB catchment and the map.
   - name: Sunnylea
     side: west
     districts: [W07, W08]
     confidence: unconfirmed
-    note: Not a TRREB community. Candidate districts only.
+    note: Not a TRREB community. TRREB's official map makes W07 (Stonegate-Queensway) the area south of Bloor and Dundas between Islington Ave and the Humber River, and puts Kingsway South, just north of Bloor, in W08. Check which side of Bloor the streets you care about are on.
 
 # Human readable labels for TRREB districts that appear in the target areas.
 district_labels:

@@ -8,6 +8,7 @@ import {
   paymentGrid,
   premiumRate,
   qualifyingRate,
+  scenarioFromBuyer,
   transferTax,
   type Inputs,
 } from "./mortgage";
@@ -167,5 +168,21 @@ describe("Ontario page closed forms", () => {
     for (const p of [2_000_001, 2_500_000, 3_000_000]) {
       expect(transferTax(p, ONTARIO_LTT)).toBeCloseTo(p * 0.025 - 13_525, 6);
     }
+  });
+});
+
+describe("scenarioFromBuyer", () => {
+  const budget = { min: 1_100_000, max: 1_350_000 };
+  it("starts from the owner's plan", () => {
+    const s = scenarioFromBuyer({ budget, down_payment_pct: 0.35, first_time_buyer: true, amortization_years: 30 });
+    expect(s).toEqual({ price: 1_225_000, down: 428_750, amortYears: 30, firstTimeBuyer: true, downPct: 0.35 });
+    const r = calculate({ price: s.price, down: s.down, ratePct: 5, amortYears: s.amortYears, firstTimeBuyer: s.firstTimeBuyer, compounding: "semiannual", otherClosing: 0 });
+    expect(r.insured).toBe(false); // 20% or more down: no premium, no price cap
+    expect(r.blockers).toEqual([]);
+    expect(r.premiumTax).toBe(0);
+  });
+  it("falls back to conservative defaults", () => {
+    const s = scenarioFromBuyer({ budget });
+    expect(s).toMatchObject({ downPct: 0.2, amortYears: 25, firstTimeBuyer: false });
   });
 });

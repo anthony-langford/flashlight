@@ -227,3 +227,21 @@ export function paymentGrid(
     };
   });
 }
+
+/** Starting point for the calculator from the buyer profile (price at the middle of the budget). */
+export function scenarioFromBuyer(buyer: {
+  budget: { min: number; max: number };
+  down_payment_pct?: number;
+  first_time_buyer?: boolean;
+  amortization_years?: number;
+}): { price: number; down: number; amortYears: number; firstTimeBuyer: boolean; downPct: number } {
+  const price = Math.round((buyer.budget.min + buyer.budget.max) / 2 / 25_000) * 25_000;
+  const downPct = buyer.down_payment_pct ?? 0.2;
+  return {
+    price,
+    down: Math.round(price * downPct),
+    amortYears: buyer.amortization_years === 30 ? 30 : 25,
+    firstTimeBuyer: buyer.first_time_buyer === true,
+    downPct,
+  };
+}

@@ -46,6 +46,9 @@ export type Buyer = {
   budget: { min: number; max: number };
   timeline: string;
   property_types: string[];
+  down_payment_pct?: number;
+  first_time_buyer?: boolean;
+  amortization_years?: number;
   target_areas: TargetArea[];
   district_labels: Record<string, string>;
 };
